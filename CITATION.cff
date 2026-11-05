@@ -1,0 +1,27 @@
+cff-version: 1.2.0
+message: "If you use C2KG, please cite the paper below."
+title: "C2KG: a leakage-audited command-and-control knowledge graph benchmark"
+type: software
+authors:
+  - family-names: Cho
+    given-names: Jaekyu
+    affiliation: "Changwon National University"
+version: 1.0.0
+license: MIT
+repository-code: "https://github.com/jaguar4you/c2kg"
+keywords:
+  - knowledge graph
+  - link prediction
+  - benchmark
+  - data leakage
+  - command and control
+preferred-citation:
+  type: article
+  authors:
+    - family-names: Cho
+      given-names: Jaekyu
+      affiliation: "Changwon National University"
+  title: "C2KG: A Leakage-Audited Command-and-Control Knowledge Graph Benchmark and Three Confounds in Link-Prediction Evaluation"
+  journal: "****"
+  year: 2026
+  notes: "Submitted."

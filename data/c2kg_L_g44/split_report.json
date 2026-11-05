@@ -1,0 +1,19 @@
+{
+  "symmetric_relations": {
+    "alliedWith": 1.0,
+    "adjacentTo": 1.0
+  },
+  "coreferent_relation_pairs": {
+    "('locatedAt', 'occursAt')": 1.0
+  },
+  "n_groups": 10634,
+  "group_size_histogram": {
+    "1": 8713,
+    "2": 1921
+  },
+  "split": [
+    10045,
+    1255,
+    1255
+  ]
+}

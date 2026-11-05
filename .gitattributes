@@ -1,0 +1,7 @@
+# keep data and code byte-identical on every platform
+*.txt  text eol=lf
+*.dict text eol=lf
+*.json text eol=lf
+*.py   text eol=lf
+*.md   text eol=lf
+*.cff  text eol=lf

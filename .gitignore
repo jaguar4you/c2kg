@@ -1,0 +1,18 @@
+# re-runs and model checkpoints (written by the runners)
+runs/
+ckpt/
+*.pt
+*.json.tmp
+*.log
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# OS / editors
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

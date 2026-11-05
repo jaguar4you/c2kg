@@ -1,0 +1,5 @@
+# Experiments of the paper: PyTorch 2.11 with CUDA 12.8.
+# For a CUDA build of PyTorch follow https://pytorch.org/get-started/locally/
+torch>=2.1
+numpy>=1.24
+scipy>=1.10        # optional: paired t-test in the reports

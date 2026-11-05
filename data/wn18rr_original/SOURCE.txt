@@ -1,0 +1,13 @@
+WN18RR (Dettmers et al., "Convolutional 2D Knowledge Graph Embeddings", AAAI 2018),
+derived from WordNet (Princeton University).
+
+These three files are the standard WN18RR split (86,835 / 3,034 / 3,134 triples,
+40,943 entities, 11 relations).  Their content (sorted triples) is identical to
+  - github.com/DeepGraphLearning/KnowledgeGraphEmbedding, data/wn18rr
+    (the RotatE authors' repository)
+  - github.com/villmow/datasets_knowledge_embedding, WN18RR/original
+and is checked again by wn18rr_prepare.py through content hashes.
+
+WordNet is distributed under the WordNet License
+(https://wordnet.princeton.edu/license-and-commercial-use):
+WordNet 3.0 Copyright 2006 by Princeton University.  All rights reserved.

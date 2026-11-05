@@ -1,0 +1,34 @@
+{
+  "symmetric_relations": {
+    "_also_see": 0.6776504297994269,
+    "_derivationally_related_form": 1.0,
+    "_verb_group": 1.0,
+    "_similar_to": 1.0
+  },
+  "coreferent_relation_pairs": {},
+  "n_groups": 75948,
+  "group_size_histogram": {
+    "1": 58893,
+    "2": 17055
+  },
+  "seed": 42,
+  "split_sizes": [
+    86835,
+    3034,
+    3134
+  ],
+  "original_test_triples_with_entity_unseen_in_train": 210,
+  "relation_patterns": {
+    "_also_see": "symmetric",
+    "_derivationally_related_form": "symmetric",
+    "_has_part": "general",
+    "_hypernym": "general",
+    "_instance_hypernym": "general",
+    "_member_meronym": "general",
+    "_member_of_domain_region": "general",
+    "_member_of_domain_usage": "general",
+    "_similar_to": "symmetric",
+    "_synset_domain_topic_of": "general",
+    "_verb_group": "symmetric"
+  }
+}

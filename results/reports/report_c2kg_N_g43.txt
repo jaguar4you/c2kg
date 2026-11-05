@@ -1,0 +1,42 @@
+== rate selection (seed 0, validation MRR) ==
+transe    s1  1e-2:0.0045  1e0:0.1030*
+          s2  1e-1:0.1503*
+rotate    s1  1e-2:0.0049  3e0:0.2477*
+          s2  1e-1:0.3433*
+distmult  s1  1e-2:0.0287  1e-1:0.2173*
+          s2  3e-1:0.2252*
+complex   s1  1e-2:0.0359  1e-1:0.2074*
+          s2  1e-1:0.2136*
+rgcn      s1  1e-2:0.0365  3e-2:0.1185*
+          s2  1e-2:0.2293*
+compgcn   s1  
+          s2  
+re_rgcn   gnn 1e-2:0.3434*   (emb 1e-1)
+
+== final: tail-only test MRR, mean +/- std over seeds ==
+model                 naive 1e-2               tuned s1           two-stage s2
+transe     0.0048+/-0.0005 (n=3)  0.1224+/-0.0063 (n=3)  0.1581+/-0.0017 (n=3)
+rotate     0.0054+/-0.0008 (n=3)  0.2643+/-0.0085 (n=3)  0.3418+/-0.0047 (n=3)
+distmult   0.0412+/-0.0021 (n=3)  0.2335+/-0.0043 (n=3)  0.2426+/-0.0100 (n=3)
+complex    0.0479+/-0.0003 (n=3)  0.2218+/-0.0056 (n=3)  0.2289+/-0.0054 (n=3)
+rgcn       0.0519+/-0.0026 (n=3)  0.1403+/-0.0097 (n=3)  0.2524+/-0.0076 (n=3)
+compgcn                        -                      -                      -
+re_rgcn                                                  0.3444+/-0.0034 (n=3)
+
+re_rgcn minus RotatE s2 (paired, n=3): +0.0026 +/- 0.0013   paired t-test p = 0.0789
+
+== per pattern, two-stage (ws: warm-started), tail-only MRR ==
+model     symmetric antisymme   inverse compositi       N-N   general
+transe        0.226     0.016     0.034     0.113     0.021     0.297
+rotate        0.831     0.012     0.011     0.576     0.026     0.352
+distmult      0.803     0.010     0.012     0.145     0.014     0.243
+complex       0.728     0.008     0.006     0.162     0.011     0.237
+rgcn          0.782     0.013     0.009     0.201     0.026     0.251
+compgcn           -         -         -         -         -         -
+re_rgcn       0.835     0.015     0.011     0.581     0.026     0.354
+
+== diagnostics: 0 run(s) diverged, collapsed (>1% tied gold scores) or produced NaN; none of them can be selected ==
+
+run on cuda:NVIDIA GeForce RTX 5090 | torch 2.11.0+cu128 | data 2fbef686a58d | code 3e40bca8d9e5
+
+Random-ranking tail MRR: 0.0042 for 1,923 candidates (C2KG seed 42)
