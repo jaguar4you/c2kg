@@ -7,17 +7,16 @@ with a per-relation-pattern breakdown.
 
 Training objective
 ------------------
-We adopt the 1-vs-all multi-label cross-entropy objective with label
-smoothing (Dettmers et al. 2018; Lacroix et al. 2018; Ruffinelli et al.
-2020), the canonical and most effective training loss for tensor-
-factorisation link predictors.  For a query (h, r, ?) the model scores all
-N candidate tails in a single matrix product and is trained with binary
-cross-entropy against the multi-hot vector of all true tails.  The mirror
-query (?, r, t) is handled by inverse relations.
+1-N (KvsAll) multi-label binary cross-entropy with label smoothing
+(Dettmers et al. 2018; Ruffinelli et al. 2020).  Every pair (h, r) in the
+training set forms a tail query whose targets are all of its true tails,
+and every pair (r, t) a head query whose targets are all of its true heads.
+Both are scored against all entities in one matrix product; head queries
+are scored directly (score_all_h), not through added inverse relations.
 
-For the R-GCN family the encoder is computed once per epoch (transductive
-setting of Schlichtkrull et al. 2018); gradients of all query mini-batches
-are accumulated into the single encoder graph before one optimisation step.
+Models with a graph encoder recompute the entity representations over the
+full training graph for every mini-batch, so that they receive one
+optimisation step per mini-batch, like the embedding models.
 """
 
 import os, json, time, random
