@@ -1,0 +1,38 @@
+{
+  "source": "c2kg_N",
+  "test_triples": 1257,
+  "test_triples_with_partner_in_train": 248,
+  "test_triples_fully_blocked": 248,
+  "train_triples_removed": 248,
+  "partners_kept_for_coverage": [],
+  "train_before": 10059,
+  "train_after": 9811,
+  "inverse_pairs": {
+    "supports": [
+      "supportedBy"
+    ],
+    "supportedBy": [
+      "supports"
+    ],
+    "threatens": [
+      "threatenedBy"
+    ],
+    "threatenedBy": [
+      "threatens"
+    ]
+  },
+  "coreferent_pairs": {
+    "locatedAt": [
+      "occursAt"
+    ],
+    "occursAt": [
+      "locatedAt"
+    ]
+  },
+  "removed_by_relation": {
+    "adjacentTo": 112,
+    "alliedWith": 47,
+    "locatedAt": 45,
+    "occursAt": 44
+  }
+}

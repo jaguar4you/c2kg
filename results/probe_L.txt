@@ -2,33 +2,33 @@ dataset ../data/c2kg_L: 1923 entities, train 10059, test 1257
 NOTE: tail-side queries only; compare with the tail-only MRR of the trained models.
 
 mined 2-hop rules (confidence, support, rule):
-    0.288  n=  958   locatedAt o adjacentTo -> nearLocation
+    0.280  n=  916   locatedAt o adjacentTo -> nearLocation
 
 === probe: path (no training) ===
-  overall   MRR 0.1020  H@1 0.1010  H@10 0.1010  (n=1257)
-  symmetric      MRR 0.0010  H@1 0.0000  H@10 0.0000  (n=212)
-  antisymmetric  MRR 0.0010  H@1 0.0000  H@10 0.0000  (n=94)
-  inverse        MRR 0.0010  H@1 0.0000  H@10 0.0000  (n=26)
-  composition    MRR 0.6618  H@1 0.6615  H@10 0.6615  (n=192)
-  N-N            MRR 0.0010  H@1 0.0000  H@10 0.0000  (n=307)
-  general        MRR 0.0010  H@1 0.0000  H@10 0.0000  (n=426)
+  overall   MRR 0.0945  H@1 0.0912  H@10 0.0954  (n=1257)
+  symmetric      MRR 0.0042  H@1 0.0005  H@10 0.0052  (n=238)
+  antisymmetric  MRR 0.0042  H@1 0.0005  H@10 0.0052  (n=99)
+  inverse        MRR 0.0042  H@1 0.0005  H@10 0.0052  (n=21)
+  composition    MRR 0.6566  H@1 0.6554  H@10 0.6570  (n=174)
+  N-N            MRR 0.0042  H@1 0.0005  H@10 0.0052  (n=313)
+  general        MRR 0.0042  H@1 0.0005  H@10 0.0052  (n=412)
 
 === probe: rule (no training) ===
-  overall   MRR 0.1020  H@1 0.1010  H@10 0.1010  (n=1257)
-  symmetric      MRR 0.0010  H@1 0.0000  H@10 0.0000  (n=212)
-  antisymmetric  MRR 0.0010  H@1 0.0000  H@10 0.0000  (n=94)
-  inverse        MRR 0.0010  H@1 0.0000  H@10 0.0000  (n=26)
-  composition    MRR 0.6618  H@1 0.6615  H@10 0.6615  (n=192)
-  N-N            MRR 0.0010  H@1 0.0000  H@10 0.0000  (n=307)
-  general        MRR 0.0010  H@1 0.0000  H@10 0.0000  (n=426)
+  overall   MRR 0.0945  H@1 0.0912  H@10 0.0954  (n=1257)
+  symmetric      MRR 0.0042  H@1 0.0005  H@10 0.0052  (n=238)
+  antisymmetric  MRR 0.0042  H@1 0.0005  H@10 0.0052  (n=99)
+  inverse        MRR 0.0042  H@1 0.0005  H@10 0.0052  (n=21)
+  composition    MRR 0.6566  H@1 0.6554  H@10 0.6570  (n=174)
+  N-N            MRR 0.0042  H@1 0.0005  H@10 0.0052  (n=313)
+  general        MRR 0.0042  H@1 0.0005  H@10 0.0052  (n=412)
 
 === probe: freq (no training) ===
-  overall   MRR 0.0454  H@1 0.0064  H@10 0.1161  (n=1257)
-  symmetric      MRR 0.0141  H@1 0.0000  H@10 0.0142  (n=212)
-  antisymmetric  MRR 0.0081  H@1 0.0000  H@10 0.0106  (n=94)
-  inverse        MRR 0.0091  H@1 0.0000  H@10 0.0000  (n=26)
-  composition    MRR 0.0254  H@1 0.0000  H@10 0.0469  (n=192)
-  N-N            MRR 0.0315  H@1 0.0000  H@10 0.0651  (n=307)
-  general        MRR 0.0904  H@1 0.0188  H@10 0.2653  (n=426)
+  overall   MRR 0.0511  H@1 0.0140  H@10 0.1208  (n=1257)
+  symmetric      MRR 0.0140  H@1 0.0000  H@10 0.0185  (n=238)
+  antisymmetric  MRR 0.0082  H@1 0.0000  H@10 0.0068  (n=99)
+  inverse        MRR 0.0318  H@1 0.0095  H@10 0.0652  (n=21)
+  composition    MRR 0.0370  H@1 0.0115  H@10 0.0670  (n=174)
+  N-N            MRR 0.0420  H@1 0.0112  H@10 0.0812  (n=313)
+  general        MRR 0.0966  H@1 0.0289  H@10 0.2630  (n=412)
 
 written to ../results/probe_L.json

@@ -155,6 +155,8 @@ def build_graph(seed=42,
     for _ in range(int(0.8 * len(all_units))):
         force = fr_units if rng.random() < 0.5 else en_units
         a, b = rng.sample(force, 2)
+        while (b, "supports", a) in triples:         # strictly antisymmetric
+            a, b = rng.sample(force, 2)
         add(a, "supports", b)
         add(b, "supportedBy", a)                     # inverse rule
 

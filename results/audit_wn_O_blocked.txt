@@ -1,0 +1,34 @@
+dataset : ../data/wn18rr_O_blocked
+entities 40943  relations 11  train 85786  valid 3034  test 3134
+
+--- detected structures (from the training graph) ---
+  self-inverse (symmetric) relations:
+    _derivationally_related_form             symmetry 0.964
+    _verb_group                              symmetry 0.964
+    _similar_to                              symmetry 0.961
+    _also_see                                symmetry 0.654
+  inverse relation pairs: none
+  co-referent relation pairs: none
+
+--- per-relation leakage in the test split ---
+relation                                   test         mirror      inverse       co-ref
+_hypernym                                  1251     0 (  0.0%)     0 (  0.0%)     0 (  0.0%)
+_derivationally_related_form               1074    35 (  3.3%)     0 (  0.0%)     0 (  0.0%)
+_member_meronym                             253     0 (  0.0%)     0 (  0.0%)     0 (  0.0%)
+_has_part                                   172     0 (  0.0%)     0 (  0.0%)     0 (  0.0%)
+_instance_hypernym                          122     0 (  0.0%)     0 (  0.0%)     0 (  0.0%)
+_synset_domain_topic_of                     114     0 (  0.0%)     0 (  0.0%)     0 (  0.0%)
+_also_see                                    56     2 (  3.6%)     0 (  0.0%)     0 (  0.0%)
+_verb_group                                  39     0 (  0.0%)     0 (  0.0%)     0 (  0.0%)
+_member_of_domain_region                     26     0 (  0.0%)     0 (  0.0%)     0 (  0.0%)
+_member_of_domain_usage                      24     0 (  0.0%)     0 (  0.0%)     0 (  0.0%)
+_similar_to                                   3     0 (  0.0%)     0 (  0.0%)     0 (  0.0%)
+
+--- aggregate over 3134 test triples ---
+  symmetric mirror :     37 (  1.2%)
+  inverse pair     :      0 (  0.0%)
+  co-referent edge :      0 (  0.0%)
+  ANY of the above :     37 (  1.2%)
+
+Note: a high mirror rate is a property of the split, not proof of a defect.
+Report it and let the reader judge how much of the score is retrieval.

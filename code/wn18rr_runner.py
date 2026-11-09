@@ -3,25 +3,24 @@ wn18rr_runner.py
 ----------------
 WN18RR experiment: does the leakage-aware split change conclusions on WN18RR?
 
-Runs RotatE, ComplEx and DistMult on two splits of the same WN18RR triples
+Runs RotatE, ComplEx and DistMult on splits of the same WN18RR triples
 (prepared by wn18rr_prepare.py):
 
   wn18rr_O   the original split (34.7 % of its test triples have their
              symmetric mirror in training)
   wn18rr_L   the leakage-aware re-split with the original sizes
+  wn18rr_O_blocked  the original split without the training triples that
+             restate a test triple (make_blocked.py); final runs only, with
+             --rates-from the results file of wn18rr_O
 
 Everything is done by c2kg_runner.py, unchanged, so that the protocol is
-the one used on C2KG: d = 64, KvsAll BCE with label smoothing 0.1,
-Adam, at most 160 epochs, validation every 15, patience 6,
-learning rates from the same ladder selected on seed-0 validation MRR with
-automatic edge extension, stage 1 and stage 2 ("no stage 2" competing),
-filtered ranking with the expected rank for ties.  This wrapper changes only
-what has to differ for WN18RR:
+the one used on C2KG: d = 64, KvsAll BCE with label smoothing 0.1, Adam,
+batch 512, at most 160 epochs, validation every 15, patience 6, learning
+rates from the same ladder selected on seed-0 validation MRR with automatic
+edge extension, stage 1 and stage 2 ("no stage 2" competing), filtered
+ranking with exact expectations under random tie-breaking.  This wrapper
+changes only what has to differ for WN18RR:
 
-  * batch    512 queries instead of 4096.  WN18RR has 21 times more
-             entities than C2KG; with 4096 an epoch is only 26 optimiser
-             steps and DistMult reached validation MRR 0.007 after 15
-             epochs, against 0.306 with 512.
   * models   RotatE, ComplEx, DistMult; no warm-started encoder
   * seeds    final runs use training seeds 0, 1, 2 by default
   * final    no shared-rate (lr 1e-2) runs; the learning-rate confound is
@@ -29,7 +28,7 @@ what has to differ for WN18RR:
   * types    no ontology type masks (WN18RR has no entity types)
   * fingerprint  also hashes this file and wn18rr_prepare.py
   * report   adds the head-and-tail (two-direction) metrics usually reported
-             for WN18RR, and the random-ranking MRR for 40,943 candidates
+             for WN18RR
 
 Usage (from the code folder, after wn18rr_prepare.py)
   python wn18rr_runner.py smoke  --data ../data/wn18rr_L --device cuda
@@ -39,8 +38,6 @@ Usage (from the code folder, after wn18rr_prepare.py)
   (the same four with wn18rr_L and wn_L.json)
 """
 
-import contextlib
-import io
 import os
 import sys
 import time
@@ -54,7 +51,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 
 
 # ---- what differs from C2KG ---------------------------------------------------
-C.BS = 512                                               # see the docstring
+C.BS = 512          # the default of c2kg_runner.py as well; see the docstring
 C.build_type_mask = lambda id2ent, rel2id: None          # no entity types
 
 
@@ -79,6 +76,18 @@ def cmd_smoke(ctx):
 
 
 def cmd_final(ctx):
+    src = ctx.args.rates_from
+    if src:                          # e.g. the leak-blocked variant
+        other = __import__("json").load(open(src))
+        if "selected" not in other:
+            raise SystemExit(f"{src} has no selected rates; run sweep there")
+        if ctx.R.get("selected_from") not in (None, src):
+            raise SystemExit(f"{ctx.out} already uses rates from "
+                             f"{ctx.R['selected_from']}")
+        ctx.R["selected"] = other["selected"]
+        ctx.R["selected_from"] = src
+        ctx.save()
+        print(f"rates taken from {src} (no sweep on this dataset)")
     sel = ctx.R.get("selected", {})
     missing = [m for m in ctx.args.models if m not in sel]
     if missing:
@@ -94,15 +103,7 @@ def cmd_final(ctx):
 
 
 def cmd_report(ctx):
-    buf = io.StringIO()
-    with contextlib.redirect_stdout(buf):
-        _base_report(ctx)
-    n = int(ctx.R.get("_meta", {}).get("n_ent", 40943))
-    rnd = sum(1.0 / k for k in range(1, n + 1)) / n
-    out = buf.getvalue().replace(
-        "Random-ranking tail MRR: 0.0042 for 1,923 candidates (C2KG seed 42)",
-        f"Random-ranking MRR: {rnd:.5f} for {n:,} candidates (WN18RR)")
-    print(out, end="")
+    _base_report(ctx)
 
     # head-and-tail metrics, as usually reported for WN18RR
     R, sel = ctx.R, ctx.R.get("selected", {})
@@ -145,8 +146,8 @@ def main():
     if not argv or argv[0] not in ("smoke", "sweep", "final", "report"):
         raise SystemExit("usage: python wn18rr_runner.py "
                          "{smoke,sweep,final,report} --data ... --out ...")
-    if "--rates-from" in argv:
-        raise SystemExit("--rates-from is not used for WN18RR")
+    if "--rates-from" in argv and argv[0] != "final":
+        raise SystemExit("--rates-from applies to final only")
     if "--models" in argv:
         i = argv.index("--models") + 1
         j = i

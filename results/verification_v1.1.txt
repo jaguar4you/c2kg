@@ -1,0 +1,32 @@
+Verification of the v1.1 code before the v1.1 experiments (CPU, torch 2.15.0+cu132)
+
+1. python test_metrics.py
+metrics ok: exact = Monte Carlo (300 tied rows, largest deviation 0.0029); no ties = ordinary ranks; probes = trainer; all-tied row of 1923 = 0.004233
+
+2. python check_data.py
+c2kg_L             c64839834e08  OK
+c2kg_L_g43         695f0696f57c  OK
+c2kg_L_g44         f9ca8b0accc5  OK
+c2kg_N             5d3f9bb15156  OK
+c2kg_N_blocked     cd539bf9c13b  OK
+c2kg_N_g43         2fbef686a58d  OK
+c2kg_N_g44         c6f4c72a54c7  OK
+wn18rr_L           251af9c1c1b2  OK
+wn18rr_O           ca22fabe2697  OK
+wn18rr_O_blocked   d0d4c7bff14e  OK
+all data folders match
+
+3. Regression against the v1.0 code (same data c2kg_L v1.0, batch 4096, 16 epochs, seed 0,
+   all six models, shared rate, stage 1, stage 2 and WS-RGCN: 18 runs)
+   largest difference in validation MRR, tail MRR or head-and-tail MRR: 7.2e-11
+   (the v1.0 code used 1/E[rank]; the difference comes only from the few tied queries)
+   best epochs: identical in all 18 runs
+   per-query g and m reproduce tail, head-and-tail and type-constrained MRR to 1e-9
+
+4. Dry run of every command in RUNBOOK.md with --epochs 2 (CPU): sweep, final,
+   --rates-from, leak-blocked data, --bs 4096, --dim 128, --margin 6, WN18RR-O-blocked,
+   report: all completed; fingerprint check stops a results file run with another --bs.
+
+5. Code fingerprints recorded by this version in every results file:
+   c2kg_runner.py runs: code_sha 9180722b6c77...
+   wn18rr_runner.py runs: code_sha 731a29f5e086...

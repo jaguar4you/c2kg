@@ -24,8 +24,14 @@ Rate selection (seed 0, validation MRR, never test)
   option "no stage 2" competes too: if no stage-2 rate beats the stage-1
   validation MRR, lr2 is recorded as none.
 
-Fixed settings: d=64, 160 epochs, batch 4096, evaluation every 15 epochs,
-patience 6, KvsAll BCE with label smoothing 0.1 (train_eval.train_model).
+Fixed settings: d=64, margin 9, at most 160 epochs, batch 512, evaluation
+every 15 epochs, patience 6, KvsAll BCE with label smoothing 0.1
+(train_eval.train_model).  --dim, --margin, --bs and --epochs change them
+for sensitivity runs; they are stored in the results file and checked by
+the fingerprint, so different settings never share one file.
+
+Metrics: filtered ranking; MRR and Hits@k are exact expectations under
+uniformly random tie-breaking (see train_eval.py), MR the expected rank.
 
 Subcommands (run from the code directory)
   smoke   2 epochs per model: checks that the device works end to end
@@ -45,16 +51,20 @@ command skips what is already there, so an interrupted run resumes.
 
 Safeguards
   * selftest: before smoke, sweep and final, the evaluator is checked on
-    models whose correct MRR is known (oracle = 1.0, constant scores and
-    NaN scores = near zero, exact tie arithmetic).  Any failure stops.
+    scorers whose correct MRR is known exactly (oracle = 1.0; constant and
+    all-NaN scores = the random-ranking value; anti-oracle = 1/(#non-true
+    candidates + 1)) and on hand-computed tie arithmetic.  Any failure
+    stops.
   * fingerprint: the first run stores hashes of the data files and of the
     code, plus device and library versions, in the results file.  A later
     run with different data, different code or a different device stops
     instead of mixing results.
   * tripwire: a run whose validation or test MRR exceeds 0.9 stops the
     command; no model can legitimately reach that on C2KG.
-  * degenerate runs (training diverged, >5 % tied gold scores, or any NaN
-    score) are recorded but can never be selected as a learning rate.
+  * degenerate runs (training diverged, or on the validation set >5 % of
+    queries with a tied gold score, or any NaN score) are recorded but can
+    never be selected as a learning rate.  The test set is used for no
+    decision.
   * the results file is written atomically.
 
 Requires train_eval.py, models.py, ontology.py and warmstart_gnn.py in the
@@ -72,6 +82,7 @@ import time
 import numpy as np
 import torch
 
+import models
 import train_eval
 from train_eval import load_dicts, load_triples, build_adj
 from models import build_model as _orig_build_model
@@ -79,9 +90,10 @@ from ontology import build_type_mask
 from warmstart_gnn import build_warmstart
 
 # ---- fixed protocol ----------------------------------------------------------
-DIM, EPOCHS, BS, EVAL_EVERY, PATIENCE = 64, 160, 4096, 15, 6
+DIM, EPOCHS, BS, EVAL_EVERY, PATIENCE = 64, 160, 512, 15, 6
 MODELS = ["transe", "rotate", "distmult", "complex", "rgcn", "compgcn"]
 WS = "re_rgcn"
+METRIC = "expected-rr-v2"          # exact expectations under random ties
 NAIVE_LR = 1e-2
 PATS = ["symmetric", "antisymmetric", "inverse", "composition", "N-N",
         "general"]
@@ -217,6 +229,8 @@ def summarise(res):
             "best_epoch": res.get("best_epoch"),
             "last_epoch": res.get("last_epoch"),
             "diverged_epoch": res.get("diverged_epoch"),
+            "val_tied_frac": res.get("val_tied_frac"),
+            "val_nan_frac": res.get("val_nan_frac"),
             "test": t, "pattern": pat}
 
 
@@ -224,10 +238,11 @@ IMPLAUSIBLE = 0.9          # no model reaches this MRR on C2KG legitimately
 
 
 def degenerate(rec):
-    """Runs that must never be selected: diverged, collapsed or NaN."""
-    t = rec.get("test", {})
+    """Runs that must never be selected: diverged, collapsed or NaN.
+    Judged on the validation set, so that the test set enters no decision."""
     return (rec.get("diverged_epoch") is not None
-            or t.get("tied_frac", 0) > 0.05 or t.get("nan_frac", 0) > 0)
+            or (rec.get("val_tied_frac") or 0) > 0.05
+            or (rec.get("val_nan_frac") or 0) > 0)
 
 
 def sel_val(rec):
@@ -359,9 +374,11 @@ def code_sha():
 
 
 def data_sha(data):
-    return _sha([os.path.join(data, f) for f in
-                 ("entities.dict", "relations.dict", "train.txt",
-                  "valid.txt", "test.txt", "relation_patterns.json")])
+    files = ["entities.dict", "relations.dict", "train.txt", "valid.txt",
+             "test.txt", "relation_patterns.json"]
+    if os.path.exists(os.path.join(data, train_eval.FILTER_EXTRA)):
+        files.append(train_eval.FILTER_EXTRA)       # leak-blocked variant
+    return _sha([os.path.join(data, f) for f in files])
 
 
 def selftest(data, device):
@@ -379,7 +396,10 @@ def selftest(data, device):
        any(tuple(x) in trs for x in va.tolist()):
         fails.append("a valid/test triple also occurs in train")
 
-    tf, hf = train_eval.all_true(tr, va, te)
+    xp = os.path.join(data, train_eval.FILTER_EXTRA)
+    ex = (load_triples(xp, e2i, r2i) if os.path.exists(xp)
+          else np.zeros((0, 3), np.int64))
+    tf, hf = train_eval.all_true(tr, va, te, ex)
 
     class Fixed(torch.nn.Module):
         encoder_kind = "none"
@@ -408,25 +428,43 @@ def selftest(data, device):
         def score_all_h(self, E, r, t):
             return self._rows([(int(a), int(b)) for a, b in zip(r, t)], hf)
 
-    expect = {"oracle": (1.0, 1.0), "anti": (0.0, 0.002),
-              "const": (0.0, 0.002), "nan": (0.0, 0.002)}
+    # exact expected MRR of each scorer (tail and head queries)
+    Hn = [0.0]
+    for k in range(1, n + 1):
+        Hn.append(Hn[-1] + 1.0 / k)
     sub = te[:200]
-    for kind, (lo, hi) in expect.items():
+    sizes = ([len(tf[(int(h), int(r))]) for h, r, t in sub]
+             + [len(hf[(int(r), int(t))]) for h, r, t in sub])
+    expect = {"oracle": 1.0,
+              # all candidates tie except the filtered other true ones
+              "const": float(np.mean([Hn[n - k + 1] / (n - k + 1)
+                                      for k in sizes])),
+              # every non-true candidate scores above the gold
+              "anti": float(np.mean([1.0 / (n - k + 1) for k in sizes])),
+              # all scores -inf: the gold ties with every entity
+              "nan": Hn[n] / n}
+    for kind, want in expect.items():
         res, _ = train_eval.evaluate(Fixed(kind), sub, None, tf, hf, n,
                                      device)
-        mrr = res["MRR"]
-        if not (lo - 1e-9 <= mrr <= hi + 1e-9):
-            fails.append(f"{kind}: MRR {mrr:.6f}, expected [{lo}, {hi}]")
-    # exact tie arithmetic: gold 3, one higher, two equal -> rank 3.0
-    rk = train_eval._rank(torch.tensor([[5., 3., 3., 3., 1.]]),
-                          torch.tensor([3.]))
-    if abs(float(rk[0]) - 3.0) > 1e-9:
-        fails.append(f"tie arithmetic: rank {float(rk[0])}, expected 3.0")
+        if abs(res["MRR"] - want) > 1e-9:
+            fails.append(f"{kind}: MRR {res['MRR']:.9f}, expected {want:.9f}")
+    # tie arithmetic by hand: gold 3, one candidate above, two equal ->
+    # ranks 2..4 equally likely
+    H5 = train_eval._harmonic(5, "cpu")
+    g, m = train_eval._tie_counts(torch.tensor([[5., 3., 3., 3., 1.]]),
+                                  torch.tensor([3.]))
+    ex_ = train_eval._expected(g, m, H5)
+    want = {"rr": (1 / 2 + 1 / 3 + 1 / 4) / 3, "rank": 3.0,
+            "h1": 0.0, "h3": 2 / 3, "h10": 1.0}
+    for k_, v_ in want.items():
+        if abs(float(ex_[k_][0]) - v_) > 1e-12:
+            fails.append(f"tie arithmetic {k_}: {float(ex_[k_][0])}, "
+                         f"expected {v_}")
     if fails:
         raise SystemExit("SELFTEST FAILED -- nothing was run:\n  "
                          + "\n  ".join(fails))
-    print("selftest ok: oracle 1.0, anti-oracle/constant/NaN near 0, "
-          "tie arithmetic exact, no train/test overlap")
+    print("selftest ok: oracle 1.0, constant/NaN = random-ranking value, "
+          "anti-oracle exact, tie arithmetic exact, no train/test overlap")
 
 
 def check_fingerprint(ctx, allow_change):
@@ -434,14 +472,16 @@ def check_fingerprint(ctx, allow_change):
             "device": ("cuda:" + torch.cuda.get_device_name(0))
             if ctx.device.startswith("cuda") else "cpu",
             "torch": torch.__version__, "n_ent": ctx.n_ent,
-            "epochs": ctx.epochs,
+            "epochs": ctx.epochs, "bs": BS, "dim": DIM,
+            "margin": models.MARGIN, "metric": METRIC,
             "data": os.path.abspath(ctx.data)}
     old = ctx.R.get("_meta")
     if old is None:
         ctx.R["_meta"] = meta
         ctx.save()
         return
-    diff = [k for k in ("data_sha", "code_sha", "device", "torch", "epochs")
+    diff = [k for k in ("data_sha", "code_sha", "device", "torch", "epochs",
+                        "bs", "dim", "margin", "metric")
             if old.get(k) != meta[k]]
     if diff and not allow_change:
         raise SystemExit(
@@ -687,11 +727,23 @@ def cmd_report(ctx):
     if meta:
         print(f"\nrun on {meta.get('device')} | torch {meta.get('torch')} | "
               f"data {meta.get('data_sha')[:12]} | code {meta.get('code_sha')[:12]}")
-    print("\nRandom-ranking tail MRR: 0.0042 for 1,923 candidates "
-          "(C2KG seed 42)")
+        print(f"protocol: d={meta.get('dim')}  margin={meta.get('margin')}  "
+              f"batch={meta.get('bs')}  epochs<={meta.get('epochs')}  "
+              f"metric={meta.get('metric')}")
+        n = int(meta.get("n_ent", 0))
+        if n:
+            rnd = sum(1.0 / k for k in range(1, n + 1)) / n
+            print(f"\nRandom-ranking MRR (exact): {rnd:.5f} for {n:,} "
+                  f"candidates")
 
 
 # ---- main --------------------------------------------------------------------
+def _set_protocol(bs, dim, margin):
+    global BS, DIM
+    BS, DIM = int(bs), int(dim)
+    models.MARGIN = float(margin)
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[1])
     ap.add_argument("cmd", choices=["smoke", "sweep", "final", "report"])
@@ -712,8 +764,15 @@ def main():
     ap.add_argument("--epochs", type=int, default=EPOCHS,
                     help="epoch limit (default 160; the extended runs "
                          "of the paper use 640)")
+    ap.add_argument("--bs", type=int, default=BS,
+                    help="queries per mini-batch (default 512)")
+    ap.add_argument("--dim", type=int, default=DIM,
+                    help="embedding dimension d (default 64)")
+    ap.add_argument("--margin", type=float, default=models.MARGIN,
+                    help="margin of TransE, RotatE and WS-RGCN (default 9)")
     args = ap.parse_args()
     args.models_ws = [] if args.no_ws else [WS]
+    _set_protocol(args.bs, args.dim, args.margin)
 
     if args.cmd == "report":
         if not args.out or not os.path.exists(args.out):
@@ -738,8 +797,8 @@ def main():
     else:
         torch.set_num_threads(1)
         print(f"torch {torch.__version__}  CPU, 1 thread")
-    if args.epochs != EPOCHS:
-        print(f"!! epochs = {args.epochs} (paper protocol: {EPOCHS})")
+    print(f"protocol: d={DIM}  margin={models.MARGIN:g}  batch={BS}  "
+          f"epochs<={args.epochs}  metric={METRIC}")
     ctx = Ctx(args)
     selftest(args.data, args.device)
     if args.out:

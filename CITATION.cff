@@ -6,7 +6,7 @@ authors:
   - family-names: Cho
     given-names: Jaekyu
     affiliation: "Changwon National University"
-version: 1.0.1
+version: 1.1.0
 license: MIT
 repository-code: "https://github.com/jaguar4you/c2kg"
 keywords:

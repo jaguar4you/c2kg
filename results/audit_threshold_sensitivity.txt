@@ -1,0 +1,60 @@
+Sensitivity of the audit to the detection threshold and minimum support
+(structures detected from the training graph; ANY = test triples with a mirror,
+ inverse or co-referent counterpart in training)
+
+== c2kg_N
+  threshold 0.3  support   5 | symmetric 2: alliedWith, adjacentTo | inverse pairs 2 | co-referent 1: locatedAt==occursAt | ANY 248 (19.7%)
+  threshold 0.3  support  20 | symmetric 2: alliedWith, adjacentTo | inverse pairs 2 | co-referent 1: locatedAt==occursAt | ANY 248 (19.7%)
+  threshold 0.3  support  50 | symmetric 2: alliedWith, adjacentTo | inverse pairs 1 | co-referent 1: locatedAt==occursAt | ANY 248 (19.7%)
+  threshold 0.5  support   5 | symmetric 2: alliedWith, adjacentTo | inverse pairs 2 | co-referent 1: locatedAt==occursAt | ANY 248 (19.7%)
+  threshold 0.5  support  20 | symmetric 2: alliedWith, adjacentTo | inverse pairs 2 | co-referent 1: locatedAt==occursAt | ANY 248 (19.7%)
+  threshold 0.5  support  50 | symmetric 2: alliedWith, adjacentTo | inverse pairs 1 | co-referent 1: locatedAt==occursAt | ANY 248 (19.7%)
+  threshold 0.7  support   5 | symmetric 2: alliedWith, adjacentTo | inverse pairs 2 | co-referent 1: locatedAt==occursAt | ANY 248 (19.7%)
+  threshold 0.7  support  20 | symmetric 2: alliedWith, adjacentTo | inverse pairs 2 | co-referent 1: locatedAt==occursAt | ANY 248 (19.7%)
+  threshold 0.7  support  50 | symmetric 2: alliedWith, adjacentTo | inverse pairs 1 | co-referent 1: locatedAt==occursAt | ANY 248 (19.7%)
+  threshold 0.9  support   5 | symmetric 0: - | inverse pairs 2 | co-referent 0: - | ANY 159 (12.6%)
+  threshold 0.9  support  20 | symmetric 0: - | inverse pairs 2 | co-referent 0: - | ANY 159 (12.6%)
+  threshold 0.9  support  50 | symmetric 0: - | inverse pairs 1 | co-referent 0: - | ANY 159 (12.6%)
+
+== c2kg_L
+  threshold 0.3  support   5 | symmetric 2: adjacentTo, alliedWith | inverse pairs 2 | co-referent 1: locatedAt==occursAt | ANY 0 (0.0%)
+  threshold 0.3  support  20 | symmetric 2: adjacentTo, alliedWith | inverse pairs 2 | co-referent 1: locatedAt==occursAt | ANY 0 (0.0%)
+  threshold 0.3  support  50 | symmetric 2: adjacentTo, alliedWith | inverse pairs 1 | co-referent 1: locatedAt==occursAt | ANY 0 (0.0%)
+  threshold 0.5  support   5 | symmetric 2: adjacentTo, alliedWith | inverse pairs 2 | co-referent 1: locatedAt==occursAt | ANY 0 (0.0%)
+  threshold 0.5  support  20 | symmetric 2: adjacentTo, alliedWith | inverse pairs 2 | co-referent 1: locatedAt==occursAt | ANY 0 (0.0%)
+  threshold 0.5  support  50 | symmetric 2: adjacentTo, alliedWith | inverse pairs 1 | co-referent 1: locatedAt==occursAt | ANY 0 (0.0%)
+  threshold 0.7  support   5 | symmetric 2: adjacentTo, alliedWith | inverse pairs 2 | co-referent 1: locatedAt==occursAt | ANY 0 (0.0%)
+  threshold 0.7  support  20 | symmetric 2: adjacentTo, alliedWith | inverse pairs 2 | co-referent 1: locatedAt==occursAt | ANY 0 (0.0%)
+  threshold 0.7  support  50 | symmetric 2: adjacentTo, alliedWith | inverse pairs 1 | co-referent 1: locatedAt==occursAt | ANY 0 (0.0%)
+  threshold 0.9  support   5 | symmetric 2: adjacentTo, alliedWith | inverse pairs 2 | co-referent 1: locatedAt==occursAt | ANY 0 (0.0%)
+  threshold 0.9  support  20 | symmetric 2: adjacentTo, alliedWith | inverse pairs 2 | co-referent 1: locatedAt==occursAt | ANY 0 (0.0%)
+  threshold 0.9  support  50 | symmetric 2: adjacentTo, alliedWith | inverse pairs 1 | co-referent 1: locatedAt==occursAt | ANY 0 (0.0%)
+
+== wn18rr_O
+  threshold 0.3  support   5 | symmetric 4: _derivationally_related_form, _verb_group, _similar_to, _also_see | inverse pairs 0 | co-referent 0: - | ANY 1086 (34.7%)
+  threshold 0.3  support  20 | symmetric 4: _derivationally_related_form, _verb_group, _similar_to, _also_see | inverse pairs 0 | co-referent 0: - | ANY 1086 (34.7%)
+  threshold 0.3  support  50 | symmetric 4: _derivationally_related_form, _verb_group, _similar_to, _also_see | inverse pairs 0 | co-referent 0: - | ANY 1086 (34.7%)
+  threshold 0.5  support   5 | symmetric 4: _derivationally_related_form, _verb_group, _similar_to, _also_see | inverse pairs 0 | co-referent 0: - | ANY 1086 (34.7%)
+  threshold 0.5  support  20 | symmetric 4: _derivationally_related_form, _verb_group, _similar_to, _also_see | inverse pairs 0 | co-referent 0: - | ANY 1086 (34.7%)
+  threshold 0.5  support  50 | symmetric 4: _derivationally_related_form, _verb_group, _similar_to, _also_see | inverse pairs 0 | co-referent 0: - | ANY 1086 (34.7%)
+  threshold 0.7  support   5 | symmetric 3: _derivationally_related_form, _verb_group, _similar_to | inverse pairs 0 | co-referent 0: - | ANY 1086 (34.7%)
+  threshold 0.7  support  20 | symmetric 3: _derivationally_related_form, _verb_group, _similar_to | inverse pairs 0 | co-referent 0: - | ANY 1086 (34.7%)
+  threshold 0.7  support  50 | symmetric 3: _derivationally_related_form, _verb_group, _similar_to | inverse pairs 0 | co-referent 0: - | ANY 1086 (34.7%)
+  threshold 0.9  support   5 | symmetric 3: _derivationally_related_form, _verb_group, _similar_to | inverse pairs 0 | co-referent 0: - | ANY 1086 (34.7%)
+  threshold 0.9  support  20 | symmetric 3: _derivationally_related_form, _verb_group, _similar_to | inverse pairs 0 | co-referent 0: - | ANY 1086 (34.7%)
+  threshold 0.9  support  50 | symmetric 3: _derivationally_related_form, _verb_group, _similar_to | inverse pairs 0 | co-referent 0: - | ANY 1086 (34.7%)
+
+== wn18rr_L
+  threshold 0.3  support   5 | symmetric 4: _derivationally_related_form, _verb_group, _similar_to, _also_see | inverse pairs 0 | co-referent 0: - | ANY 1 (0.0%)
+  threshold 0.3  support  20 | symmetric 4: _derivationally_related_form, _verb_group, _similar_to, _also_see | inverse pairs 0 | co-referent 0: - | ANY 1 (0.0%)
+  threshold 0.3  support  50 | symmetric 4: _derivationally_related_form, _verb_group, _similar_to, _also_see | inverse pairs 0 | co-referent 0: - | ANY 1 (0.0%)
+  threshold 0.5  support   5 | symmetric 4: _derivationally_related_form, _verb_group, _similar_to, _also_see | inverse pairs 0 | co-referent 0: - | ANY 1 (0.0%)
+  threshold 0.5  support  20 | symmetric 4: _derivationally_related_form, _verb_group, _similar_to, _also_see | inverse pairs 0 | co-referent 0: - | ANY 1 (0.0%)
+  threshold 0.5  support  50 | symmetric 4: _derivationally_related_form, _verb_group, _similar_to, _also_see | inverse pairs 0 | co-referent 0: - | ANY 1 (0.0%)
+  threshold 0.7  support   5 | symmetric 3: _derivationally_related_form, _verb_group, _similar_to | inverse pairs 0 | co-referent 0: - | ANY 1 (0.0%)
+  threshold 0.7  support  20 | symmetric 3: _derivationally_related_form, _verb_group, _similar_to | inverse pairs 0 | co-referent 0: - | ANY 1 (0.0%)
+  threshold 0.7  support  50 | symmetric 3: _derivationally_related_form, _verb_group, _similar_to | inverse pairs 0 | co-referent 0: - | ANY 1 (0.0%)
+  threshold 0.9  support   5 | symmetric 3: _derivationally_related_form, _verb_group, _similar_to | inverse pairs 0 | co-referent 0: - | ANY 1 (0.0%)
+  threshold 0.9  support  20 | symmetric 3: _derivationally_related_form, _verb_group, _similar_to | inverse pairs 0 | co-referent 0: - | ANY 1 (0.0%)
+  threshold 0.9  support  50 | symmetric 3: _derivationally_related_form, _verb_group, _similar_to | inverse pairs 0 | co-referent 0: - | ANY 1 (0.0%)
+

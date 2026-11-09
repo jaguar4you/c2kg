@@ -1,5 +1,5 @@
-C2KG data (folders c2kg_L, c2kg_N, c2kg_L_g43, c2kg_N_g43, c2kg_L_g44,
-c2kg_N_g44) and the result files in ../results
+C2KG data (folders c2kg_L, c2kg_N, c2kg_N_blocked, c2kg_L_g43, c2kg_N_g43,
+c2kg_L_g44, c2kg_N_g44) and the result files in ../results
 
 Copyright (c) 2026 Jaekyu Cho
 
@@ -10,8 +10,8 @@ link to the license, and indicate if changes were made.
 
 License text: https://creativecommons.org/licenses/by/4.0/legalcode
 
-The data are synthetic. They were produced by code/data_gen.py and
-code/split_fixed.py and contain no operational, personal or classified
+The data are synthetic. They were produced by code/data_gen.py,
+code/split_fixed.py and code/make_blocked.py and contain no operational, personal or classified
 information.
 
 The WN18RR folders (wn18rr_original, wn18rr_O, wn18rr_L) are not covered by

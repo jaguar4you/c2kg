@@ -26,6 +26,8 @@ import torch.nn.functional as F
 from collections import defaultdict
 from models import build_model
 
+FILTER_EXTRA = "filter_extra.txt"
+
 
 # ----------------------------------------------------------------------------
 # Data
@@ -89,50 +91,108 @@ def kvsall_queries(train):
 # ----------------------------------------------------------------------------
 # Evaluation (filtered)
 # ----------------------------------------------------------------------------
+# Ties.  For a query, let g be the number of candidates scored strictly above
+# the gold entity and m the number scored equal to it, the gold included
+# (m >= 1).  Under uniformly random tie-breaking the gold takes each of the
+# ranks g+1, ..., g+m with probability 1/m, so the exact expectations are
+#
+#   E[rank]   = g + (m + 1) / 2
+#   E[1/rank] = (1/m) * sum_{j=1..m} 1/(g+j) = (H(g+m) - H(g)) / m
+#   E[Hits@k] = clip(k - g, 0, m) / m
+#
+# with H the harmonic numbers.  MRR and Hits@k below are these expectations
+# averaged over queries (not the reciprocal of the expected rank, which
+# underestimates the MRR when ties occur); MR is the mean expected rank.
+# Without ties (m = 1) all three reduce to the ordinary definitions.
+
+_HARMONIC = {}
+
+
+def _harmonic(n, device):
+    """H(0..n) as a float64 tensor on ``device`` (cached)."""
+    key = (int(n), str(device))
+    if key not in _HARMONIC:
+        h = torch.zeros(int(n) + 1, dtype=torch.float64)
+        h[1:] = torch.cumsum(
+            1.0 / torch.arange(1, int(n) + 1, dtype=torch.float64), 0)
+        _HARMONIC[key] = h.to(device)
+    return _HARMONIC[key]
+
+
+def _tie_counts(scores, gold):                     # [tie/NaN fix]
+    """g = #(score > gold) and m = #(score == gold), the gold included."""
+    s = gold.unsqueeze(1)
+    return (scores > s).sum(1), (scores == s).sum(1)
+
+
+def _expected(greater, equal, H):
+    """Exact per-query expectations under random tie-breaking."""
+    g, m = greater.long(), equal.long()
+    gd, md = g.double(), m.double()
+    out = {"rr": (H[g + m] - H[g]) / md,
+           "rank": gd + (md + 1.0) / 2.0,
+           "g": g, "m": m}
+    for k in (1, 3, 10):
+        out[f"h{k}"] = torch.minimum(torch.clamp(k - gd, min=0.0), md) / md
+    return out
+
+
 def _rank(scores, true):                           # [tie/NaN fix]
-    """Rank of the gold entity with ties broken at random, in expectation.
-
-    rank = 1 + #(score > gold) + (#(score == gold) - 1) / 2
-
-    A strict-'>' rule would rank the gold first among every candidate
-    tied with it.  A model whose representations collapse (e.g. dead ReLU
-    units giving identical scores) then receives MRR close to 1.0.  The
-    expected rank under random tie-breaking is the protocol recommended by
-    Sun et al. (ACL 2020).  Without ties both rules give the same rank."""
-    g = true.unsqueeze(1)
-    greater = (scores > g).sum(1).double()
-    equal = (scores == g).sum(1).double()          # includes the gold
-    return greater + 1.0 + (equal - 1.0) / 2.0
+    """Expected rank of the gold entity under random tie-breaking,
+    g + (m + 1) / 2 (used for MR; MRR and Hits@k use _expected)."""
+    g, m = _tie_counts(scores, true)
+    return g.double() + (m.double() + 1.0) / 2.0
 
 
 def _no_nan(scores):                               # [tie/NaN fix]
-    """NaN scores (a diverged model) rank last instead of first."""
+    """NaN scores (a diverged model) are set to -inf: a NaN gold ranks
+    below every finite candidate, and an all-NaN row ties throughout."""
     return torch.where(torch.isnan(scores),
                        torch.full_like(scores, float("-inf")), scores)
 
 
+def _summary(ex):
+    """Aggregate per-query expectations (dict of 1-D numpy arrays)."""
+    return {"MRR": float(np.mean(ex["rr"])),
+            "MR": float(np.mean(ex["rank"])),
+            "H@1": float(np.mean(ex["h1"])),
+            "H@3": float(np.mean(ex["h3"])),
+            "H@10": float(np.mean(ex["h10"]))}
+
+
+def _cat(parts):
+    keys = parts[0].keys()
+    return {k: np.concatenate([p[k] for p in parts]) for k in keys}
+
+
+def _sel(ex, mask):
+    return {k: v[mask] for k, v in ex.items()}
+
+
 @torch.no_grad()
 def evaluate(model, triples, E, t_filter, h_filter, n_ent, device,
-             rel_pattern=None, id2rel=None, batch=512, type_masks=None):
-    """Filtered link-prediction evaluation.
+             rel_pattern=None, id2rel=None, batch=512, type_masks=None,
+             per_triple=False):
+    """Filtered link-prediction evaluation (tail and head queries).
 
     If ``type_masks`` is given (dict relation_id -> (head_mask, tail_mask)
     of bool tensors of length n_ent), the function additionally computes
     type-constrained metrics in which ontology-invalid candidates receive
-    score -inf.  This is computed alongside the
-    unconstrained metrics in a single pass."""
+    score -inf.  This is computed alongside the unconstrained metrics in a
+    single pass.  With ``per_triple`` the exact reciprocal rank of every
+    tail and head query is returned as well, in the order of ``triples``."""
     model.eval()
+    H = _harmonic(n_ent, device)
     n_q = n_tied = n_nan = 0                       # [tie/NaN fix]
-    ranks, ranks_c = [], []
-    ranks_t, ranks_t_c = [], []          # # [tail-only patch] tail-side only
-    per_pat = defaultdict(list)
-    per_pat_c = defaultdict(list)
-    per_pat_t = defaultdict(list)        # # [tail-only patch]
+    parts_t, parts_h, parts_tc, parts_hc, rels = [], [], [], [], []
     T = torch.tensor(triples, dtype=torch.long, device=device)
     if type_masks is not None:
         # pre-build per-relation mask tensors once
         tmask_t = {r_: torch.tensor(m[1], device=device) for r_, m in type_masks.items()}
         tmask_h = {r_: torch.tensor(m[0], device=device) for r_, m in type_masks.items()}
+
+    def _np(ex):
+        return {k: v.cpu().numpy() for k, v in ex.items()}
 
     for i in range(0, len(T), batch):
         b = T[i:i + batch]
@@ -147,19 +207,19 @@ def evaluate(model, triples, E, t_filter, h_filter, n_ent, device,
             st[j, list(t_filter[(int(h[j]), int(r[j]))])] = float("-inf")  # [guard]
         st[ar, t] = true_t
 
-        # --- unconstrained tail rank
-        rank_t = _rank(st, true_t)                       # [tie/NaN fix]
-        n_tied += int(((st == true_t.unsqueeze(1)).sum(1) > 1).sum())
+        # --- unconstrained tail queries
+        g_, m_ = _tie_counts(st, true_t)               # [tie/NaN fix]
+        parts_t.append(_np(_expected(g_, m_, H)))
+        n_tied += int((m_ > 1).sum())
 
-        # --- type-constrained tail rank
-        rank_t_c = None
+        # --- type-constrained tail queries
         if type_masks is not None:
             st_c = st.clone()
             for j in range(len(b)):
                 m = ~tmask_t[int(r[j])]
                 st_c[j, m] = float("-inf")  # [guard]
             st_c[ar, t] = true_t        # never mask the gold
-            rank_t_c = _rank(st_c, true_t)
+            parts_tc.append(_np(_expected(*_tie_counts(st_c, true_t), H)))
 
         sh = model.score_all_h(E, r, t)
         n_nan += int(torch.isnan(sh).any(1).sum())     # [tie/NaN fix]
@@ -169,67 +229,73 @@ def evaluate(model, triples, E, t_filter, h_filter, n_ent, device,
             sh[j, list(h_filter[(int(r[j]), int(t[j]))])] = float("-inf")  # [guard]
         sh[ar, h] = true_h
 
-        rank_h = _rank(sh, true_h)                       # [tie/NaN fix]
-        n_tied += int(((sh == true_h.unsqueeze(1)).sum(1) > 1).sum())
+        g_, m_ = _tie_counts(sh, true_h)               # [tie/NaN fix]
+        parts_h.append(_np(_expected(g_, m_, H)))
+        n_tied += int((m_ > 1).sum())
         n_q += 2 * len(b)
 
-        rank_h_c = None
         if type_masks is not None:
             sh_c = sh.clone()
             for j in range(len(b)):
                 m = ~tmask_h[int(r[j])]
                 sh_c[j, m] = float("-inf")  # [guard]
             sh_c[ar, h] = true_h
-            rank_h_c = _rank(sh_c, true_h)
+            parts_hc.append(_np(_expected(*_tie_counts(sh_c, true_h), H)))
+        rels.append(r.cpu().numpy())
 
-        rt = rank_t.cpu().numpy(); rh = rank_h.cpu().numpy()
-        rr = r.cpu().numpy()
-        if type_masks is not None:
-            rt_c = rank_t_c.cpu().numpy(); rh_c = rank_h_c.cpu().numpy()
-        for j in range(len(b)):
-            ranks.append(rt[j]); ranks.append(rh[j])
-            ranks_t.append(rt[j])                    # # [tail-only patch]
-            if type_masks is not None:
-                ranks_c.append(rt_c[j]); ranks_c.append(rh_c[j])
-                ranks_t_c.append(rt_c[j])            # # [tail-only patch]
-            if rel_pattern is not None:
-                p = rel_pattern[id2rel[int(rr[j])]]
-                per_pat[p].append(rt[j]); per_pat[p].append(rh[j])
-                per_pat_t[p].append(rt[j])           # # [tail-only patch]
-                if type_masks is not None:
-                    per_pat_c[p].append(rt_c[j]); per_pat_c[p].append(rh_c[j])
-
-    def _agg(ranks_arr):
-        ranks_arr = np.array(ranks_arr, dtype=np.float64)
-        return {"MRR": float(np.mean(1.0 / ranks_arr)),
-                "MR":  float(np.mean(ranks_arr)),
-                "H@1": float(np.mean(ranks_arr <= 1)),
-                "H@3": float(np.mean(ranks_arr <= 3)),
-                "H@10": float(np.mean(ranks_arr <= 10))}
-
-    res = _agg(ranks)
-    res["tail_only"] = _agg(ranks_t)                 # # [tail-only patch]
+    ex_t, ex_h = _cat(parts_t), _cat(parts_h)      # [tail-only patch]
+    both = _cat([ex_t, ex_h])
+    res = _summary(both)
+    res["tail_only"] = _summary(ex_t)              # # [tail-only patch]
     # share of queries (tail and head) whose gold score is tied with at
     # least one other candidate, and whose score row contains NaN
     res["tied_frac"] = n_tied / max(n_q, 1)          # [tie/NaN fix]
     res["nan_frac"] = n_nan / max(n_q, 1)
-    pat_res = {p: {"MRR": float(np.mean(1.0 / np.array(rk))),
-                   "H@10": float(np.mean(np.array(rk) <= 10)),
-                   "n": int(len(rk))} for p, rk in per_pat.items()}
-    for p, rk in per_pat_t.items():                  # # [tail-only patch]
-        a = np.array(rk, dtype=np.float64)
-        pat_res.setdefault(p, {})
-        pat_res[p]["MRR_tail"] = float(np.mean(1.0 / a))
-        pat_res[p]["H@10_tail"] = float(np.mean(a <= 10))
-        pat_res[p]["n_tail"] = int(len(a))
+    res["metric"] = "exact expectation under random tie-breaking"
+    if per_triple:
+        # g (candidates above the gold) and m (tied with it, gold included)
+        # of every query, in the order of ``triples``: every rank-based
+        # metric of every query can be recomputed exactly from them
+        res["per_triple"] = {
+            "tail_g": ex_t["g"].astype(int).tolist(),
+            "tail_m": ex_t["m"].astype(int).tolist(),
+            "head_g": ex_h["g"].astype(int).tolist(),
+            "head_m": ex_h["m"].astype(int).tolist()}
+
+    pat_res = {}
+    if rel_pattern is not None:
+        rr = np.concatenate(rels)
+        pats = np.array([rel_pattern[id2rel[int(x)]] for x in rr])
+        for p in sorted(set(pats.tolist())):
+            mk = pats == p
+            pb = _cat([_sel(ex_t, mk), _sel(ex_h, mk)])
+            pt = _sel(ex_t, mk)
+            pat_res[p] = {"MRR": float(np.mean(pb["rr"])),
+                          "H@10": float(np.mean(pb["h10"])),
+                          "n": int(len(pb["rr"])),
+                          "MRR_tail": float(np.mean(pt["rr"])),   # [tail-only patch]
+                          "H@10_tail": float(np.mean(pt["h10"])),
+                          "n_tail": int(len(pt["rr"]))}
     if type_masks is not None:
-        res_c = _agg(ranks_c)
-        pat_res_c = {p: {"MRR": float(np.mean(1.0 / np.array(rk))),
-                         "H@10": float(np.mean(np.array(rk) <= 10)),
-                         "n": int(len(rk))} for p, rk in per_pat_c.items()}
-        res_c["tail_only"] = _agg(ranks_t_c)         # # [tail-only patch]
+        ex_tc, ex_hc = _cat(parts_tc), _cat(parts_hc)
+        res_c = _summary(_cat([ex_tc, ex_hc]))
+        res_c["tail_only"] = _summary(ex_tc)         # # [tail-only patch]
+        pat_res_c = {}
+        if rel_pattern is not None:
+            for p in sorted(set(pats.tolist())):
+                mk = pats == p
+                pb = _cat([_sel(ex_tc, mk), _sel(ex_hc, mk)])
+                pt = _sel(ex_tc, mk)
+                pat_res_c[p] = {"MRR": float(np.mean(pb["rr"])),
+                                "H@10": float(np.mean(pb["h10"])),
+                                "n": int(len(pb["rr"])),
+                                "MRR_tail": float(np.mean(pt["rr"])),
+                                "n_tail": int(len(pt["rr"]))}
         res["constrained"] = res_c
         res["constrained_pattern"] = pat_res_c
+        if per_triple:
+            res["per_triple"]["tail_g_c"] = ex_tc["g"].astype(int).tolist()
+            res["per_triple"]["tail_m_c"] = ex_tc["m"].astype(int).tolist()
     return res, pat_res
 
 
@@ -255,7 +321,12 @@ def train_model(name, data_dir, dim=200, epochs=300, lr=2e-3,
     test  = load_triples(os.path.join(data_dir, "test.txt"),  ent2id, rel2id)
     rel_pattern = json.load(open(os.path.join(data_dir,
                                               "relation_patterns.json")))
-    t_filt, h_filt = all_true(train, valid, test)
+    # optional: further true triples that are filtered at evaluation but
+    # neither trained on nor evaluated (used by the leak-blocked variant)
+    extra_path = os.path.join(data_dir, FILTER_EXTRA)
+    extra = (load_triples(extra_path, ent2id, rel2id)
+             if os.path.exists(extra_path) else np.zeros((0, 3), np.int64))
+    t_filt, h_filt = all_true(train, valid, test, extra)
 
     # bidirectional KvsAll queries: tail (h,r)->T and head (r,t)->H
     qt, qh = kvsall_queries(train)
@@ -279,6 +350,7 @@ def train_model(name, data_dir, dim=200, epochs=300, lr=2e-3,
 
     nq = len(rows)
     best_val, best_test, best_pat = -1.0, None, None
+    best_vstat = (0.0, 0.0)
     best_state, best_ep, diverged_ep, last_ep = None, None, None, None  # [guard]
     bad = 0
     start_ep = 1
@@ -295,6 +367,7 @@ def train_model(name, data_dir, dim=200, epochs=300, lr=2e-3,
         prior_elapsed = ck["elapsed"]
         best_state = ck.get("best_state")              # [guard]
         best_ep = ck.get("best_ep")
+        best_vstat = tuple(ck.get("best_vstat", best_vstat))
         if "rng_torch" in ck:          # restore the exact RNG stream
             torch.set_rng_state(ck["rng_torch"])
 
@@ -305,6 +378,7 @@ def train_model(name, data_dir, dim=200, epochs=300, lr=2e-3,
                     "ep": ep, "best_val": best_val, "best_test": best_test,
                     "best_pat": best_pat, "bad": bad,
                     "best_state": best_state, "best_ep": best_ep,  # [guard]
+                    "best_vstat": best_vstat,
                     "elapsed": prior_elapsed + (time.time() - t0),
                     # RNG state must be persisted: without it a resumed run
                     # draws a different torch.randperm sequence than an
@@ -377,9 +451,11 @@ def train_model(name, data_dir, dim=200, epochs=300, lr=2e-3,
                                n_ent, device)
             if vres["MRR"] > best_val + 1e-5:
                 best_val = vres["MRR"]
+                best_vstat = (vres["tied_frac"], vres["nan_frac"])
                 best_test, best_pat = evaluate(
                     model, test, E, t_filt, h_filt, n_ent, device,
-                    rel_pattern, id2rel, type_masks=type_masks)
+                    rel_pattern, id2rel, type_masks=type_masks,
+                    per_triple=True)
                 best_state = {k: v.detach().clone()      # [guard]
                               for k, v in model.state_dict().items()}
                 best_ep = ep
@@ -407,9 +483,10 @@ def train_model(name, data_dir, dim=200, epochs=300, lr=2e-3,
             E = model.encode(adj_list) if is_rgcn else model.encode()
         vres, _ = evaluate(model, valid, E, t_filt, h_filt, n_ent, device)
         best_val = vres["MRR"]
+        best_vstat = (vres["tied_frac"], vres["nan_frac"])
         best_test, best_pat = evaluate(
             model, test, E, t_filt, h_filt, n_ent, device,
-            rel_pattern, id2rel, type_masks=type_masks)
+            rel_pattern, id2rel, type_masks=type_masks, per_triple=True)
     if best_state is not None:
         # hand back the model that produced the reported numbers, not the
         # last one: stage 2 and the warm start then begin exactly there
@@ -419,6 +496,7 @@ def train_model(name, data_dir, dim=200, epochs=300, lr=2e-3,
         os.remove(ckpt_path)
     return {"model": name, "test": best_test, "pattern": best_pat,
             "val_mrr": best_val, "params": int(n_params),
+            "val_tied_frac": best_vstat[0], "val_nan_frac": best_vstat[1],
             "best_epoch": best_ep, "last_epoch": last_ep,
             "diverged_epoch": diverged_ep,
             "train_time_s": round(prior_elapsed + time.time() - t0, 1),

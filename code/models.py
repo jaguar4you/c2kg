@@ -434,16 +434,21 @@ class CompGCN(nn.Module):
         return self._rel(r).pow(2).sum(-1).mean()
 
 
+# margin gamma of the distance-based scores (TransE, RotatE and the RotatE
+# decoder of WS-RGCN); c2kg_runner.py sets it from --margin
+MARGIN = 9.0
+
+
 def build_model(name, n_ent, n_rel, dim=200, num_bases=10, dropout=0.2):
     name = name.lower()
     if name == "transe":
-        return TransE(n_ent, n_rel, dim)
+        return TransE(n_ent, n_rel, dim, margin=MARGIN)
     if name == "distmult":
         return DistMult(n_ent, n_rel, dim)
     if name == "complex":
         return ComplEx(n_ent, n_rel, dim)
     if name == "rotate":
-        return RotatE(n_ent, n_rel, dim)
+        return RotatE(n_ent, n_rel, dim, margin=MARGIN)
     if name == "compgcn":
         return CompGCN(n_ent, n_rel, dim, dropout=dropout)
     if name == "rgcn":

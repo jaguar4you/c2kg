@@ -3,47 +3,47 @@ entities 1923  relations 23  train 10059  valid 1257  test 1257
 
 --- detected structures (from the training graph) ---
   self-inverse (symmetric) relations:
-    adjacentTo                               symmetry 0.801
-    alliedWith                               symmetry 0.793
+    alliedWith                               symmetry 0.815
+    adjacentTo                               symmetry 0.800
   inverse relation pairs:
-    supportedBy <-> supports                       1.000
+    supports <-> supportedBy                    1.000
     threatens <-> threatenedBy                   1.000
   co-referent relation pairs:
-    occursAt == locatedAt                        overlap 0.837
+    locatedAt == occursAt                         overlap 0.836
 
 --- per-relation leakage in the test split ---
 relation                                   test         mirror      inverse       co-ref
-nearLocation                                202     0 (  0.0%)     0 (  0.0%)     0 (  0.0%)
-usesEquipment                               188     0 (  0.0%)     0 (  0.0%)     0 (  0.0%)
+nearLocation                                215     0 (  0.0%)     0 (  0.0%)     0 (  0.0%)
+usesEquipment                               184     0 (  0.0%)     0 (  0.0%)     0 (  0.0%)
 adjacentTo                                  146   112 ( 76.7%)     0 (  0.0%)     0 (  0.0%) <<<
 hasParticipant                              125     0 (  0.0%)     0 (  0.0%)     0 (  0.0%)
 occursAtTime                                 99     0 (  0.0%)     0 (  0.0%)     0 (  0.0%)
-locatedAt                                    93     0 (  0.0%)     0 (  0.0%)    44 ( 47.3%) <<<
+locatedAt                                    97     0 (  0.0%)     0 (  0.0%)    44 ( 45.4%) <<<
 occursAt                                     61     0 (  0.0%)     0 (  0.0%)    45 ( 73.8%) <<<
-alliedWith                                   56    46 ( 82.1%)     0 (  0.0%)     0 (  0.0%) <<<
+alliedWith                                   59    47 ( 79.7%)     0 (  0.0%)     0 (  0.0%) <<<
 movesTo                                      50     0 (  0.0%)     0 (  0.0%)     0 (  0.0%)
-executesMove                                 40     0 (  0.0%)     0 (  0.0%)     0 (  0.0%)
-belongsTo                                    35     0 (  0.0%)     0 (  0.0%)     0 (  0.0%)
-hasOrigin                                    30     0 (  0.0%)     0 (  0.0%)     0 (  0.0%)
+executesMove                                 44     0 (  0.0%)     0 (  0.0%)     0 (  0.0%)
+hasOrigin                                    31     0 (  0.0%)     0 (  0.0%)     0 (  0.0%)
 hasTerrain                                   27     0 (  0.0%)     0 (  0.0%)     0 (  0.0%)
-supports                                     23     0 (  0.0%)     0 (  0.0%)     0 (  0.0%)
-supportedBy                                  23     0 (  0.0%)     0 (  0.0%)     0 (  0.0%)
+belongsTo                                    26     0 (  0.0%)     0 (  0.0%)     0 (  0.0%)
 hasWeather                                   21     0 (  0.0%)     0 (  0.0%)     0 (  0.0%)
-hasObstacle                                  11     0 (  0.0%)     0 (  0.0%)     0 (  0.0%)
-defends                                       9     0 (  0.0%)     0 (  0.0%)     0 (  0.0%)
+supportedBy                                  20     0 (  0.0%)     0 (  0.0%)     0 (  0.0%)
+supports                                     20     0 (  0.0%)     0 (  0.0%)     0 (  0.0%)
+defends                                      11     0 (  0.0%)     0 (  0.0%)     0 (  0.0%)
 hasDeadline                                   7     0 (  0.0%)     0 (  0.0%)     0 (  0.0%)
-hasMission                                    5     0 (  0.0%)     0 (  0.0%)     0 (  0.0%)
-threatens                                     3     0 (  0.0%)     0 (  0.0%)     0 (  0.0%)
-threatenedBy                                  3     0 (  0.0%)     0 (  0.0%)     0 (  0.0%)
+threatens                                     4     0 (  0.0%)     0 (  0.0%)     0 (  0.0%)
+threatenedBy                                  4     0 (  0.0%)     0 (  0.0%)     0 (  0.0%)
+hasObstacle                                   4     0 (  0.0%)     0 (  0.0%)     0 (  0.0%)
+hasMission                                    2     0 (  0.0%)     0 (  0.0%)     0 (  0.0%)
 
 --- aggregate over 1257 test triples ---
-  symmetric mirror :    158 ( 12.6%)
+  symmetric mirror :    159 ( 12.6%)
   inverse pair     :      0 (  0.0%)
   co-referent edge :     89 (  7.1%)
-  ANY of the above :    247 ( 19.6%)
+  ANY of the above :    248 ( 19.7%)
 
 --- composition leakage (supplied rules) ---
-  locatedAt o adjacentTo -> nearLocation: 114/202 (56.4%) of held-out nearLocation triples are derivable from training edges
+  locatedAt o adjacentTo -> nearLocation: 133/215 (61.9%) of held-out nearLocation triples are derivable from training edges
 
 Note: a high mirror rate is a property of the split, not proof of a defect.
 Report it and let the reader judge how much of the score is retrieval.

@@ -8,8 +8,9 @@ Model
 -----
 Entity inputs of width 2d are copied from the stage-1 RotatE and
 fine-tuned; relation phases are copied from the same RotatE; the decoder is
-the RotatE distance with margin 9.  Between input and decoder sit two
-residual relational blocks over the 2|R| directed relations,
+the RotatE distance with the same margin (9 by default).  Between input
+and decoder sit two residual relational blocks over the 2|R| directed
+relations,
 
     H  <-  H + Dropout(ReLU(H W0 + sum_r A_r H W_r)) U ,      U = 0 at init,
 
@@ -136,5 +137,6 @@ WARMSTART_MODELS = {"re_rgcn": "rotate"}
 def build_warmstart(name, n_ent, n_rel, dim=64, num_bases=0, dropout=0.2):
     if name not in WARMSTART_MODELS:
         raise ValueError(f"unknown warm-start model {name!r}")
+    import models
     return WarmStartRGCN(n_ent, n_rel, dim, num_bases=num_bases,
-                         dropout=dropout, n_layers=2)
+                         dropout=dropout, n_layers=2, margin=models.MARGIN)

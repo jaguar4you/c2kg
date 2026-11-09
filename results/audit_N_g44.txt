@@ -1,0 +1,49 @@
+dataset : ../data/c2kg_N_g44
+entities 1923  relations 23  train 10045  valid 1255  test 1255
+
+--- detected structures (from the training graph) ---
+  self-inverse (symmetric) relations:
+    adjacentTo                               symmetry 0.810
+    alliedWith                               symmetry 0.789
+  inverse relation pairs:
+    supports <-> supportedBy                    1.000
+    threatens <-> threatenedBy                   1.000
+  co-referent relation pairs:
+    locatedAt == occursAt                         overlap 0.780
+
+--- per-relation leakage in the test split ---
+relation                                   test         mirror      inverse       co-ref
+usesEquipment                               188     0 (  0.0%)     0 (  0.0%)     0 (  0.0%)
+nearLocation                                183     0 (  0.0%)     0 (  0.0%)     0 (  0.0%)
+adjacentTo                                  150   118 ( 78.7%)     0 (  0.0%)     0 (  0.0%) <<<
+hasParticipant                              108     0 (  0.0%)     0 (  0.0%)     0 (  0.0%)
+locatedAt                                    98     0 (  0.0%)     0 (  0.0%)    56 ( 57.1%) <<<
+occursAtTime                                 98     0 (  0.0%)     0 (  0.0%)     0 (  0.0%)
+alliedWith                                   57    44 ( 77.2%)     0 (  0.0%)     0 (  0.0%) <<<
+occursAt                                     50     0 (  0.0%)     0 (  0.0%)    43 ( 86.0%) <<<
+executesMove                                 49     0 (  0.0%)     0 (  0.0%)     0 (  0.0%)
+movesTo                                      43     0 (  0.0%)     0 (  0.0%)     0 (  0.0%)
+hasOrigin                                    36     0 (  0.0%)     0 (  0.0%)     0 (  0.0%)
+belongsTo                                    34     0 (  0.0%)     0 (  0.0%)     0 (  0.0%)
+hasWeather                                   32     0 (  0.0%)     0 (  0.0%)     0 (  0.0%)
+supportedBy                                  25     0 (  0.0%)     0 (  0.0%)     0 (  0.0%)
+supports                                     25     0 (  0.0%)     0 (  0.0%)     0 (  0.0%)
+hasTerrain                                   25     0 (  0.0%)     0 (  0.0%)     0 (  0.0%)
+hasObstacle                                  15     0 (  0.0%)     0 (  0.0%)     0 (  0.0%)
+defends                                      11     0 (  0.0%)     0 (  0.0%)     0 (  0.0%)
+hasDeadline                                   8     0 (  0.0%)     0 (  0.0%)     0 (  0.0%)
+threatens                                     7     0 (  0.0%)     0 (  0.0%)     0 (  0.0%)
+threatenedBy                                  7     0 (  0.0%)     0 (  0.0%)     0 (  0.0%)
+hasMission                                    6     0 (  0.0%)     0 (  0.0%)     0 (  0.0%)
+
+--- aggregate over 1255 test triples ---
+  symmetric mirror :    162 ( 12.9%)
+  inverse pair     :      0 (  0.0%)
+  co-referent edge :     99 (  7.9%)
+  ANY of the above :    261 ( 20.8%)
+
+--- composition leakage (supplied rules) ---
+  locatedAt o adjacentTo -> nearLocation: 111/183 (60.7%) of held-out nearLocation triples are derivable from training edges
+
+Note: a high mirror rate is a property of the split, not proof of a defect.
+Report it and let the reader judge how much of the score is retrieval.

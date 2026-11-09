@@ -32,8 +32,8 @@ Probes
           not beat it on a relation has learned nothing about that relation.
 
 Evaluation uses the same filtered protocol as train_eval.py (all other true
-triples removed from the candidate list before ranking, ties at the
-expected rank) and scores tail queries only, so the numbers are directly
+triples removed from the candidate list before ranking, exact expectations
+under random tie-breaking) and scores tail queries only, so the numbers are directly
 comparable with the tail-only MRR of the trained models.
 
 Usage
@@ -171,47 +171,56 @@ class FreqProbe:
 # filtered evaluation (tail queries; head queries need inverse edges, and a
 # lookup probe is direction-specific, so we report tail-side only and say so)
 # --------------------------------------------------------------------------
+def _expected(g, m, k):
+    """Exact expectations for a gold entity with g candidates above it and
+    m candidates (itself included) tied with it, under random tie-breaking
+    (the same definitions as train_eval.py)."""
+    rr = sum(1.0 / (g + j) for j in range(1, m + 1)) / m
+    hk = max(0, min(m, k - g)) / m
+    return rr, hk
+
+
 def evaluate(probe, test, all_true_tails, n_ent_names, patterns):
-    """Filtered MRR / Hits@K over tail queries, overall and per pattern."""
+    """Filtered MRR / Hits@K over tail queries, overall and per pattern.
+
+    Every candidate the probe does not score is treated as score 0, so the
+    gold entity of a query the probe cannot answer ties with all other
+    unscored candidates and receives the random-ranking value."""
     per_pat = defaultdict(list)
-    ranks = []
+    recs = []
     for (h, r, t) in test:
         sc = probe.score_tails(h, r)
         gold = sc.get(t, 0.0)
-        # filtered: ignore other true tails for this (h, r)
+        # filtered: ignore other true tails for this (h, r); `others`
+        # contains the gold itself
         others = all_true_tails.get((h, r), set())
-        better = sum(1 for e, s in sc.items()
-                     if s > gold and e != t and e not in others)
-        tied = sum(1 for e, s in sc.items()
-                   if s == gold and e != t and e not in others)
         if gold <= 0.0:
-            # unscored: the probe expresses no opinion.  Place the gold
-            # answer at the expected rank of a random draw among all
-            # remaining unscored candidates -- the neutral, non-flattering
-            # convention.
-            n_scored = sum(1 for e, s in sc.items()
-                           if s > 0 and e != t and e not in others)
-            # candidates other than the gold that are neither scored nor
-            # filtered; `others` contains the gold itself
-            n_rest = n_ent_names - n_scored - len(others - {t}) - 1
-            rank = n_scored + 1 + max(n_rest, 0) / 2.0   # gold ties with them
+            # unscored gold: ties with every unscored, unfiltered candidate
+            g = sum(1 for e, s in sc.items()
+                    if s > 0 and e != t and e not in others)
+            m = n_ent_names - g - len(others - {t})       # gold included
         else:
-            rank = better + 1 + tied / 2.0     # mid-rank for ties
-        ranks.append(rank)
+            g = sum(1 for e, s in sc.items()
+                    if s > gold and e != t and e not in others)
+            m = 1 + sum(1 for e, s in sc.items()
+                        if s == gold and e != t and e not in others)
+        rr, h1 = _expected(g, m, 1)
+        _, h10 = _expected(g, m, 10)
+        rec = (rr, h1, h10, g + (m + 1) / 2.0)
+        recs.append(rec)
         if patterns:
-            per_pat[patterns.get(r, "unknown")].append(rank)
+            per_pat[patterns.get(r, "unknown")].append(rec)
 
     def agg(rs):
-        import statistics
         n = len(rs)
         if not n:
             return None
-        return {"MRR": sum(1.0 / x for x in rs) / n,
-                "H@1": sum(1 for x in rs if x <= 1) / n,
-                "H@10": sum(1 for x in rs if x <= 10) / n,
-                "MR": statistics.mean(rs), "n": n}
+        return {"MRR": sum(x[0] for x in rs) / n,
+                "H@1": sum(x[1] for x in rs) / n,
+                "H@10": sum(x[2] for x in rs) / n,
+                "MR": sum(x[3] for x in rs) / n, "n": n}
 
-    return agg(ranks), {p: agg(v) for p, v in per_pat.items()}
+    return agg(recs), {p: agg(v) for p, v in per_pat.items()}
 
 
 def main():
@@ -229,12 +238,14 @@ def main():
     train = load_triples(os.path.join(args.data, "train.txt"))
     valid = load_triples(os.path.join(args.data, "valid.txt"))
     test = load_triples(os.path.join(args.data, "test.txt"))
+    xp = os.path.join(args.data, "filter_extra.txt")    # leak-blocked data
+    extra = load_triples(xp) if os.path.exists(xp) else []
     patterns = load_patterns(args.data)
-    ents = {e for (h, r, t) in train + valid + test for e in (h, t)}
+    ents = {e for (h, r, t) in train + valid + test + extra for e in (h, t)}
     n_ent = len(ents)
 
     all_true = defaultdict(set)
-    for h, r, t in train + valid + test:
+    for h, r, t in train + valid + test + extra:
         all_true[(h, r)].add(t)
 
     print(f"dataset {args.data}: {n_ent} entities, "

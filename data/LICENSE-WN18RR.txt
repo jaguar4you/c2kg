@@ -1,11 +1,12 @@
-WN18RR files (folders wn18rr_original, wn18rr_O, wn18rr_L)
+WN18RR files (folders wn18rr_original, wn18rr_O, wn18rr_O_blocked, wn18rr_L)
 
 WN18RR was introduced by T. Dettmers, P. Minervini, P. Stenetorp and
 S. Riedel, "Convolutional 2D Knowledge Graph Embeddings", AAAI 2018, and is
 derived from WordNet 3.0 (Princeton University). wn18rr_original holds the
 standard files unchanged (see wn18rr_original/SOURCE.txt); wn18rr_O is the
-same split and wn18rr_L a re-split of the same triples, both written by
-code/wn18rr_prepare.py. WordNet is distributed under the following license.
+same split, wn18rr_L a re-split of the same triples (both written by
+code/wn18rr_prepare.py), and wn18rr_O_blocked the original split without
+the training triples that restate a test triple (code/make_blocked.py). WordNet is distributed under the following license.
 
 ------------------------------------------------------------------------
 WordNet Release 3.0
