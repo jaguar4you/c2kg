@@ -20,6 +20,21 @@ triples has a training triple that restates it":
                       train, for a rule r1 o r2 -> r3.  Only checked when
                       rules are supplied with --rule.
 
+For a supplied rule, the reverse direction is also measured: training
+conclusions of the rule can reveal its held-out premises.
+
+  5. PREMISE r2       (y,r2,z) held out while (x,r1,y) and (x,r3,z) are in
+                      train for some x (a two-hop path y -r1^-1-> x -r3-> z).
+                      When r1 is functional (one r1 value per x), the premise
+                      follows exactly.  If r2 is symmetric, the mirrored
+                      premise (z,r2,y) is counted as well.
+  6. PREMISE r1       (x,r1,y) held out while y is the only entity whose
+                      training r2-neighbours (both directions if r2 is
+                      symmetric) include every training r3-tail of x.
+
+Modes 4 to 6 are inference over two hops, not one-hop restatement; they are
+reported so that the share of the test set open to such inference is known.
+
 Reported per relation and in aggregate.  Nothing is modified; this is a
 measurement tool.
 
@@ -106,6 +121,59 @@ def coreferent_candidates(by_rel, threshold, min_support):
             if rate >= threshold:
                 out[(r1, r2)] = rate
     return out
+
+
+def premise_report(train, test, r1, r2, r3, r2_symmetric):
+    """Modes 5 and 6: held-out premises of r1 o r2 -> r3 revealed by
+    training conclusions (see the module docstring)."""
+    fwd = defaultdict(lambda: defaultdict(set))
+    for (h, r, t) in train:
+        fwd[r][h].add(t)
+    heads1 = fwd[r1]
+    functional = sum(1 for x in heads1 if len(heads1[x]) == 1)
+    # mode 5: (y, r2, z) from x -r1-> y and x -r3-> z
+    by_y = defaultdict(set)            # y -> {x : (x, r1, y) in train}
+    for x, ys in heads1.items():
+        for y in ys:
+            by_y[y].add(x)
+
+    def follows(y, z):
+        return any(z in fwd[r3][x] for x in by_y.get(y, ()))
+    tst = [(y, z) for (y, r, z) in test if r == r2]
+    direct = sum(1 for (y, z) in tst if follows(y, z))
+    either = sum(1 for (y, z) in tst
+                 if follows(y, z) or (r2_symmetric and follows(z, y)))
+    if tst:
+        sym_txt = (f"; {either} ({100*either/len(tst):.1f}%) including "
+                   f"the mirrored premise, {r2} being symmetric"
+                   if r2_symmetric else "")
+        print(f"  premise {r2}: {direct}/{len(tst)} "
+              f"({100*direct/len(tst):.1f}%) of held-out {r2} triples follow "
+              f"from {r1}^-1 o {r3} in training{sym_txt} "
+              f"[{r1} has one value for {functional}/{len(heads1)} heads]")
+    # mode 6: (x, r1, y) with y the only entity consistent with x's r3-tails
+    nb = defaultdict(set)
+    for h, ts in fwd[r2].items():
+        for t in ts:
+            nb[h].add(t)
+            if r2_symmetric:
+                nb[t].add(h)
+    cands = set(nb)
+    tst1 = [(x, y) for (x, r, y) in test if r == r1]
+    with_tails = unique = 0
+    for (x, y) in tst1:
+        tails = fwd[r3].get(x, set())
+        if not tails:
+            continue
+        with_tails += 1
+        ok = [c for c in cands if tails <= nb[c]]
+        unique += ok == [y]
+    if tst1:
+        print(f"  premise {r1}: {unique}/{len(tst1)} "
+              f"({100*unique/len(tst1):.1f}%) of held-out {r1} triples have "
+              f"a unique object consistent with the training {r3} and {r2} "
+              f"edges of their subject ({with_tails} subjects have {r3} "
+              f"edges in training)")
 
 
 def main():
@@ -233,6 +301,7 @@ def main():
                       f"are derivable from training edges")
             else:
                 print(f"  {r1} o {r2} -> {r3}: no {r3} triples in test")
+            premise_report(train, test, r1, r2, r3, r2 in sym)
 
     print("\nNote: a high mirror rate is a property of the split, not proof "
           "of a defect.\nReport it and let the reader judge how much of the "

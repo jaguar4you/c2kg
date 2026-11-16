@@ -33,7 +33,8 @@ c2kg/
 │   ├── wn18rr_O_blocked/    WN18RR, original split without the training mirrors of test triples
 │   ├── wn18rr_L/            WN18RR, leakage-aware re-split with the original sizes
 │   └── FINGERPRINTS.json    data fingerprints (see below)
-└── results/                 result files of the paper
+└── results/                 audits, training-free baselines, schema check
+    └── runs/                result files of the trained models (gzip)
 ```
 
 ## The benchmark
@@ -50,9 +51,13 @@ Splits of the same graph:
   inverse-pair counterpart, its symmetric mirror and its co-referent copy
   (the same entity pair under another relation), and whole groups are
   assigned to one split. No test triple can be recovered by a one-hop
-  lookup. Composition is kept as a measured inference pattern: 114 of the
-  174 test triples of `nearLocation` (65.5 %) follow from
-  `locatedAt` ∘ `adjacentTo` in the training set.
+  lookup. Composition is kept as a measured two-hop inference pattern, in
+  both directions: 114 of the 174 test triples of `nearLocation` (65.5 %)
+  follow from `locatedAt` ∘ `adjacentTo` in the training set, and,
+  because the training conclusions of the rule reveal its premises, 120 of
+  the 160 test triples of `adjacentTo` (75.0 %) follow from
+  `locatedAt`⁻¹ ∘ `nearLocation` (directly or through the symmetry of
+  `adjacentTo`).
 * **C2KG-N**. Only explicit inverse pairs are grouped. 248 of the 1257 test
   triples (19.7 %) have a symmetric mirror or co-referent copy in training.
   It is provided to measure the effect of such redundancy, not as a
@@ -65,8 +70,13 @@ Splits of the same graph:
   (`code/make_blocked.py`).
 
 All splits keep every entity and relation in the training set
-(transductive setting). Further instances are drawn by changing the seed of
-the generator; seeds 43 and 44 are included.
+(transductive setting). Apart from these two-hop patterns, most
+relations are drawn by the generator at random among type-compatible
+entities (for example `supports`, `alliedWith`, `hasParticipant`,
+`usesEquipment`), so their held-out triples cannot be predicted beyond the
+entity types; the `type` probe in `results/probe_*.txt` gives this
+type-constrained random level per pattern. Further instances are drawn by
+changing the seed of the generator; seeds 43 and 44 are included.
 
 ### File format
 
@@ -146,8 +156,15 @@ in Windows PowerShell. First the checks:
 ```
 python test_metrics.py
 python check_data.py
+python check_schema.py
 python c2kg_runner.py smoke --data ../data/c2kg_L
 ```
+
+`check_schema.py` checks every graph against the schema and the generation
+rules (domains and ranges, symmetry, strict antisymmetry, inverse pairs,
+the composition rule, co-reference, the unit hierarchy, force constraints,
+functional relations, connectivity); its output is
+`results/schema_check.txt`.
 
 Regenerating the data (optional; the regenerated files are byte-identical
 to those in `data/`):
@@ -165,7 +182,15 @@ Audit and training-free baselines:
 ```
 python leakage_audit.py --data ../data/c2kg_L --rule locatedAt,adjacentTo,nearLocation
 python path_probe.py --data ../data/c2kg_L --probe all --rule locatedAt,adjacentTo,nearLocation --out ../runs/probe_L.json
+python path_probe.py --data ../data/wn18rr_L --probe all --out ../runs/probe_wn_L.json
 ```
+
+The probes need no training. `path` scores by the supplied composition
+rule; `rule` mines path rules of one and two edges, each traversable in
+either direction (as the path rules of AnyBURL, without rules that contain
+constants), and selects its aggregation and minimum confidence on the
+validation set; `type` ranks uniformly at random among the entities of the
+right type (C2KG only); `freq` ranks by training frequency.
 
 Trained models (`sweep` selects the learning rates on seed 0, `final`
 trains all seeds at the selected rates, `report` prints the tables):
@@ -183,6 +208,28 @@ WN18RR uses `wn18rr_runner.py` with the same subcommands. Results are
 written to `runs/`, which is not part of the repository. An interrupted
 command resumes when it is run again.
 
+## Result files
+
+`results/runs/` holds the result files of every trained-model experiment
+of the paper (gzip-compressed JSON; `RUNBOOK.md` gives the command of each).
+Each file stores the data and code fingerprints, the protocol settings,
+the selected learning rates and, for every run, the validation and test
+metrics and the counts g and m of every test query. Unpack them into
+`runs/` with
+
+```
+python unpack_results.py
+python c2kg_runner.py report --out ../runs/c2kg_L.json
+```
+
+These files were produced with release v1.1.0 (`code_sha` 9180722b6c77 for
+C2KG, 731a29f5e086 for WN18RR). Release v1.1.1 changes the code fingerprint
+(c3e0de0de8a0 and 082930b7ac7b) only through the corrected domain table in
+`ontology.py`, which affects the head-side type-constrained metrics and
+nothing else (training, the unconstrained metrics and the tail-side
+type-constrained metrics are identical); the runner therefore refuses to
+continue a v1.1.0 results file with v1.1.1 code, but a rerun reproduces it.
+
 ## Code
 
 | File | Purpose |
@@ -191,8 +238,10 @@ command resumes when it is run again.
 | `split_fixed.py` | leakage-aware split (C2KG-L) |
 | `make_blocked.py` | leak-blocked variant of a split |
 | `leakage_audit.py` | counts inverse, mirror, co-referent and composition leakage of a split |
-| `path_probe.py` | training-free baselines: path rule, rule miner, frequency |
+| `audit_sensitivity.py` | the audit at several detection thresholds and minimum supports |
+| `path_probe.py` | training-free baselines: supplied path rule, rule miner with inverse edges, type-constrained random, frequency |
 | `ontology.py` | entity types and relation domains and ranges |
+| `check_schema.py` | checks every graph against the schema and the generation rules |
 | `models.py` | TransE, RotatE, DistMult, ComplEx, R-GCN, CompGCN |
 | `warmstart_gnn.py` | WS-RGCN (`re_rgcn` in the results files): residual R-GCN warm-started from RotatE |
 | `train_eval.py` | KvsAll training and filtered evaluation |
@@ -200,6 +249,28 @@ command resumes when it is run again.
 | `wn18rr_prepare.py`, `wn18rr_runner.py` | WN18RR datasets and runs |
 | `test_metrics.py` | checks the metrics against a Monte Carlo simulation of random tie-breaking |
 | `check_data.py` | checks the data fingerprints |
+| `unpack_results.py` | unpacks `results/runs/*.json.gz` into `runs/` |
+
+## Changes in v1.1.1
+
+No data and no trained-model result changed.
+
+* `ontology.py`: the domains of `locatedAt`, `usesEquipment` (unit or
+  engagement), `movesTo` (movement), `hasObstacle` (unit) and `occursAt`
+  (engagement) now match the generator; v1.1.0 had wrong domains for
+  these relations, which affected only the head-side type-constrained
+  metrics.
+* `path_probe.py`: the rule probe follows edges in both directions, mines
+  rules of one and two edges and selects its aggregation and minimum
+  confidence on the validation set (v1.1.0: forward two-edge rules only);
+  a new `type` probe ranks at random among the entities of the right type;
+  every probe stores g and m of every test query.
+* `leakage_audit.py`: for a supplied composition rule, also counts the
+  held-out premises that the training conclusions reveal.
+* `.gitignore` ignores only the top-level `runs/`, so that `results/runs/`
+  is part of the repository.
+* New: `check_schema.py`, `audit_sensitivity.py`, `unpack_results.py`, the
+  result files of the trained models in `results/runs/`.
 
 ## Changes from v1.0
 

@@ -18,13 +18,31 @@ Probes
           2-hop paths x -r1-> y -r2-> z, for rules supplied with --rule.
           Pure lookup: no learning, no embeddings.
 
-  rule    A minimal AnyBURL-style miner.  Mines all 2-hop rules
-          r1 o r2 -> r3 from the training graph, keeps those whose
-          confidence exceeds --min-conf with at least --min-support
-          groundings, then scores candidates by the best rule confidence.
-          Unlike ``path``, the rules are discovered, not supplied, so this
-          also reports whether the intended composition rule is the one a
-          miner would actually find.
+  rule    A path-rule miner in the style of AnyBURL (without rules that
+          contain constants).  It mines every rule whose body is one or two
+          edges, each traversable in either direction,
+              r1 -> r3   and   r1 o r2 -> r3,   r1, r2 in {r, r^-1},
+          from the training graph; the confidence of a rule is the number
+          of its body groundings (x, z) that are training triples (x, r3, z)
+          divided by the number of body groundings, and rules with fewer than
+          --min-support such triples are dropped.  A candidate z of a query
+          (x, r3, ?) collects the confidences of the rules that reach it
+          from x (the query entity itself is never proposed), aggregated in
+          one of three ways:
+              max            the highest confidence
+              noisy-or       1 - prod(1 - conf) over the rules that reach z
+              noisy-or-paths 1 - prod(1 - conf) over every path that reaches z
+          The aggregation and a minimum confidence (0, 0.01 or 0.1) are
+          selected on the validation tail MRR, as the learning rates of the
+          trained models are; the test set enters no decision.  Unlike
+          ``path``, the rules are discovered, not supplied.
+
+  type    Type-constrained random ranking (C2KG only): every entity of the
+          range type of r (ontology.py) scores 1, every other entity 0, so
+          the gold entity is ranked uniformly at random among the filtered
+          candidates of the right type.  This is the level a method reaches
+          on a relation whose held-out triples carry no signal beyond the
+          entity types.
 
   freq    Frequency baseline: score every candidate by how often it appears
           as a tail of that relation in training.  This is the "by-copy"
@@ -40,6 +58,7 @@ Usage
     python path_probe.py --data ../data/c2kg_L \
         --rule locatedAt,adjacentTo,nearLocation
     python path_probe.py --data ../data/c2kg_L --probe rule
+    python path_probe.py --data ../data/wn18rr_L --probe rule
     python path_probe.py --data ../data/c2kg_L --probe freq
     python path_probe.py --data ../data/c2kg_L --probe all \
         --rule locatedAt,adjacentTo,nearLocation --out ../results/probe_L.json
@@ -99,59 +118,129 @@ class PathProbe:
 
 
 class RuleProbe:
-    """Mine 2-hop rules r1 o r2 -> r3 and score by best rule confidence."""
+    """Path rules of length 1 and 2 with inverse edges (see the module
+    docstring).  Iteration orders are fixed (sorted), so the scores, and
+    hence the ties, are reproducible bit for bit."""
     name = "rule"
+    AGGS = ("max", "noisy-or", "noisy-or-paths")
+    MIN_CONFS = (0.0, 0.01, 0.1)
 
-    def __init__(self, train, min_conf=0.1, min_support=5, max_rules=200):
-        self.out = defaultdict(list)
+    def __init__(self, train, min_support=2):
+        out = defaultdict(set)
         for h, r, t in train:
-            self.out[(h, r)].append(t)
+            out[(h, r)].add(t)
+            out[(t, r + "^-1")].add(h)
+        self.out = {k: sorted(v) for k, v in out.items()}
         rels = sorted({r for _, r, _ in train})
-        tset = set(train)
-
-        # body groundings: for each (r1, r2), collect (x, z) reachable in 2 hops
+        by_rel = defaultdict(set)
+        for h, r, t in train:
+            by_rel[r].add((h, t))
+        rels_at = defaultdict(list)                  # node -> its edge labels
+        for (x, r) in sorted(self.out):
+            rels_at[x].append(r)
+        mined = []
+        # length 1
+        pairs1 = defaultdict(set)
+        for (x, r1), zs in self.out.items():
+            for z in zs:
+                pairs1[r1].add((x, z))
+        for r1 in sorted(pairs1):
+            for r3 in rels:
+                if r1 == r3:
+                    continue
+                hits = len(pairs1[r1] & by_rel[r3])
+                if hits >= min_support:
+                    mined.append((hits / len(pairs1[r1]), hits, (r1,), r3))
+        # length 2
         body = defaultdict(set)
-        for (x, r1), ys in list(self.out.items()):
+        for (x, r1), ys in self.out.items():
             for y in ys:
-                for r2 in rels:
-                    for z in self.out.get((y, r2), ()):
+                for r2 in rels_at[y]:
+                    for z in self.out[(y, r2)]:
                         if z != x:
                             body[(r1, r2)].add((x, z))
-
-        mined = []
-        for (r1, r2), pairs in body.items():
-            if len(pairs) < min_support:
-                continue
+        for b in sorted(body):
             for r3 in rels:
-                hits = sum(1 for (x, z) in pairs if (x, r3, z) in tset)
-                if hits < min_support:
-                    continue
-                conf = hits / len(pairs)
-                if conf >= min_conf:
-                    mined.append((conf, hits, r1, r2, r3))
-        mined.sort(reverse=True)
-        self.mined = mined[:max_rules]
+                hits = len(body[b] & by_rel[r3])
+                if hits >= min_support:
+                    mined.append((hits / len(body[b]), hits, b, r3))
+        mined.sort(key=lambda m: (-m[0], -m[1], m[2], m[3]))
+        self.mined = mined
         self.by_head = defaultdict(list)
-        for conf, hits, r1, r2, r3 in self.mined:
-            self.by_head[r3].append((conf, r1, r2))
+        for conf, hits, b, r3 in mined:
+            self.by_head[r3].append((conf, b))
+        self.agg, self.min_conf = "noisy-or-paths", 0.0
+        self.selection = []
 
     def score_tails(self, h, r):
-        sc = defaultdict(float)
-        for (conf, r1, r2) in self.by_head.get(r, ()):
-            for y in self.out.get((h, r1), ()):
-                for z in self.out.get((y, r2), ()):
-                    if conf > sc[z]:
-                        sc[z] = conf
+        sc = {}
+        paths = self.agg == "noisy-or-paths"
+        for conf, b in self.by_head.get(r, ()):
+            if conf < self.min_conf:
+                continue
+            if len(b) == 1:
+                zs = self.out.get((h, b[0]), ())
+            else:
+                zs = [z for y in self.out.get((h, b[0]), ())
+                      for z in self.out.get((y, b[1]), ())]
+                if not paths:
+                    zs = sorted(set(zs))
+            for z in zs:
+                if z == h:
+                    continue
+                if self.agg == "max":
+                    sc[z] = max(sc.get(z, 0.0), conf)
+                else:
+                    sc[z] = 1.0 - (1.0 - sc.get(z, 0.0)) * (1.0 - conf)
         return sc
 
-    def report(self, top=15):
-        lines = ["mined 2-hop rules (confidence, support, rule):"]
-        for conf, hits, r1, r2, r3 in self.mined[:top]:
+    def select(self, valid, all_true, n_ent, patterns):
+        """Choose the aggregation and the minimum confidence on the
+        validation tail MRR (first best in the order of the grid)."""
+        best = None
+        for agg in self.AGGS:
+            for c in self.MIN_CONFS:
+                self.agg, self.min_conf = agg, c
+                v = evaluate(self, valid, all_true, n_ent, patterns)[0]["MRR"]
+                self.selection.append({"aggregation": agg, "min_conf": c,
+                                       "valid_tail_MRR": v})
+                if best is None or v > best[0]:
+                    best = (v, agg, c)
+        self.agg, self.min_conf = best[1], best[2]
+        return {"aggregation": best[1], "min_conf": best[2],
+                "valid_tail_MRR": best[0]}
+
+    def report(self, top=15, min_hits=10):
+        lines = [f"mined {len(self.mined)} rules; highest confidence "
+                 f"(at least {min_hits} supporting triples):"]
+        shown = [m for m in self.mined if m[1] >= min_hits][:top]
+        for conf, hits, b, r3 in shown:
             lines.append(f"    {conf:5.3f}  n={hits:5d}   "
-                         f"{r1} o {r2} -> {r3}")
-        if not self.mined:
-            lines.append("    (none above threshold)")
+                         f"{' o '.join(b)} -> {r3}")
+        if not shown:
+            lines.append("    (none)")
         return "\n".join(lines)
+
+
+class TypeProbe:
+    """Uniform ranking among the entities of the range type of r."""
+    name = "type"
+
+    def __init__(self, entities):
+        from ontology import RELATION_DOMAIN_RANGE, entity_type
+        by_type = defaultdict(list)
+        for e in sorted(entities):
+            by_type[entity_type(e)].append(e)
+        self.cands = {r: {e: 1.0 for t in sorted(rng) for e in by_type[t]}
+                      for r, (_, rng) in RELATION_DOMAIN_RANGE.items()}
+
+    @staticmethod
+    def applies(relations):
+        from ontology import RELATION_DOMAIN_RANGE
+        return set(relations) <= set(RELATION_DOMAIN_RANGE)
+
+    def score_tails(self, h, r):
+        return self.cands[r]
 
 
 class FreqProbe:
@@ -187,7 +276,7 @@ def evaluate(probe, test, all_true_tails, n_ent_names, patterns):
     gold entity of a query the probe cannot answer ties with all other
     unscored candidates and receives the random-ranking value."""
     per_pat = defaultdict(list)
-    recs = []
+    recs, gm = [], []
     for (h, r, t) in test:
         sc = probe.score_tails(h, r)
         gold = sc.get(t, 0.0)
@@ -208,6 +297,7 @@ def evaluate(probe, test, all_true_tails, n_ent_names, patterns):
         _, h10 = _expected(g, m, 10)
         rec = (rr, h1, h10, g + (m + 1) / 2.0)
         recs.append(rec)
+        gm.append((g, m))
         if patterns:
             per_pat[patterns.get(r, "unknown")].append(rec)
 
@@ -220,18 +310,20 @@ def evaluate(probe, test, all_true_tails, n_ent_names, patterns):
                 "H@10": sum(x[2] for x in rs) / n,
                 "MR": sum(x[3] for x in rs) / n, "n": n}
 
-    return agg(recs), {p: agg(v) for p, v in per_pat.items()}
+    per_triple = {"tail_g": [x[0] for x in gm], "tail_m": [x[1] for x in gm]}
+    return agg(recs), {p: agg(v) for p, v in per_pat.items()}, per_triple
 
 
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--data", required=True)
     ap.add_argument("--probe", default="all",
-                    choices=["path", "rule", "freq", "all"])
+                    choices=["path", "rule", "type", "freq", "all"])
     ap.add_argument("--rule", action="append", default=[],
                     help="composition rule 'r1,r2,r3'; repeatable")
-    ap.add_argument("--min-conf", type=float, default=0.1)
-    ap.add_argument("--min-support", type=int, default=5)
+    ap.add_argument("--min-support", type=int, default=2,
+                    help="rule probe: minimum number of supporting training "
+                         "triples of a rule (default 2)")
     ap.add_argument("--out", default=None)
     args = ap.parse_args()
 
@@ -265,17 +357,33 @@ def main():
         else:
             probes.append(PathProbe(train, rules))
     if args.probe in ("rule", "all"):
-        rp = RuleProbe(train, args.min_conf, args.min_support)
+        rp = RuleProbe(train, args.min_support)
         print(rp.report())
-        print()
+        sel = rp.select(valid, all_true, n_ent, patterns)
+        for x in rp.selection:
+            print(f"    validation: {x['aggregation']:15s} min_conf "
+                  f"{x['min_conf']:<5}  tail MRR {x['valid_tail_MRR']:.4f}")
+        print(f"  selected on validation: {sel['aggregation']}, min_conf "
+              f"{sel['min_conf']}\n")
         probes.append(rp)
+    if args.probe in ("type", "all"):
+        if TypeProbe.applies({r for _, r, _ in train + valid + test}):
+            probes.append(TypeProbe(ents))
+        else:
+            print("[type] skipped: relations not in ontology.py (C2KG only)")
     if args.probe in ("freq", "all"):
         probes.append(FreqProbe(train))
 
     results = {}
     for pr in probes:
-        overall, per_pat = evaluate(pr, test, all_true, n_ent, patterns)
-        results[pr.name] = {"overall": overall, "per_pattern": per_pat}
+        overall, per_pat, per_triple = evaluate(pr, test, all_true, n_ent,
+                                                patterns)
+        results[pr.name] = {"overall": overall, "per_pattern": per_pat,
+                            "per_triple": per_triple}
+        if pr.name == "rule":
+            results["rule"]["selected"] = sel
+            results["rule"]["validation"] = rp.selection
+            results["rule"]["n_rules"] = len(rp.mined)
         print(f"=== probe: {pr.name} (no training) ===")
         print(f"  overall   MRR {overall['MRR']:.4f}  "
               f"H@1 {overall['H@1']:.4f}  H@10 {overall['H@10']:.4f}  "

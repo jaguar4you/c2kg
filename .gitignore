@@ -1,5 +1,5 @@
 # re-runs and model checkpoints (written by the runners)
-runs/
+/runs/
 ckpt/
 *.pt
 *.json.tmp

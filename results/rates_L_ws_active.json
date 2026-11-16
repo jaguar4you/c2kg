@@ -1,0 +1,19 @@
+{
+ "selected": {
+  "rotate": {
+   "lr1": 0.3,
+   "lr2": 0.03,
+   "val1": 0.1758353704232069,
+   "val2": 0.18974673783606424,
+   "edge": false
+  },
+  "re_rgcn": {
+   "lr1": 0.3,
+   "emb": 0.03,
+   "gnn": 0.0003,
+   "val": 0.1899777380099455,
+   "edge": false
+  }
+ },
+ "_note": "rates of c2kg_L.json; WS-RGCN encoder rate fixed at 3e-4 (active encoder check)"
+}

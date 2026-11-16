@@ -1,0 +1,51 @@
+Verification of release v1.1.1 (CPU, torch 2.15.0+cu132)
+
+Data and trained-model results are unchanged from v1.1.0; v1.1.1 changes the
+domain table of ontology.py and adds training-free analyses.
+
+1. python test_metrics.py
+   metrics ok (same output as for v1.1.0)
+
+2. python check_data.py
+   all data folders match
+
+3. python check_schema.py
+   all schema checks passed (24 checks on each of the 7 C2KG folders; the
+   folders of one graph seed hold the same triples).
+   The checks fail as they should when violations are injected into a copy
+   of c2kg_N (a supports pair in both directions, a one-sided adjacentTo
+   edge, a movement with a second destination, a company under a second
+   battalion, a location with hasObstacle, an entity without a type).
+
+4. Training is unaffected by the corrected domain table. The same runs with
+   the v1.1.0 and the v1.1.1 code (C2KG-L, RotatE and DistMult, shared rate,
+   stage 1 and stage 2, seed 0, 4 epochs, CPU: 6 runs) agree in every
+   recorded value except the head-side type-constrained metrics
+   (test.constrained MRR, MR and Hits@k over head and tail queries and
+   test.constrained_pattern MRR and H@10 over head and tail queries); the
+   tail-side type-constrained metrics (test.constrained.tail_only,
+   constrained_pattern MRR_tail, per-query tail_g_c and tail_m_c) are
+   identical.
+
+5. path_probe.py
+   - path and freq probes: identical to the v1.1.0 results on all seven C2KG
+     folders.
+   - rule and type probes: identical output with PYTHONHASHSEED=1 and 777 on
+     all ten folders; per-query reciprocal ranks identical (difference 0) to
+     an independent implementation used in the analysis.
+
+6. leakage_audit.py: on every C2KG folder the output equals the v1.1.0
+   output plus the two premise lines; WN18RR outputs are unchanged.
+   audit_sensitivity.py reproduces results/audit_threshold_sensitivity.txt
+   of v1.1.0 byte for byte.
+
+7. unpack_results.py: the unpacked files are byte-identical to the result
+   files of the runs; c2kg_runner.py report reads them.
+
+8. Smoke tests (2 epochs, CPU): c2kg_runner.py smoke on c2kg_L and
+   wn18rr_runner.py smoke on wn18rr_L: SMOKE OK.
+
+9. Code fingerprints
+   results in results/runs (release v1.1.0): C2KG 9180722b6c77, WN18RR 731a29f5e086
+   release v1.1.1:                           C2KG c3e0de0de8a0, WN18RR 082930b7ac7b
+   (the difference is ontology.py only)

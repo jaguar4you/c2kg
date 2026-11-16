@@ -1,8 +1,32 @@
 dataset ../data/c2kg_L_g44: 1923 entities, train 10045, test 1255
 NOTE: tail-side queries only; compare with the tail-only MRR of the trained models.
 
-mined 2-hop rules (confidence, support, rule):
+mined 252 rules; highest confidence (at least 10 supporting triples):
+    1.000  n= 1266   adjacentTo^-1 -> adjacentTo
+    1.000  n=  484   alliedWith^-1 -> alliedWith
+    1.000  n=  444   occursAt -> locatedAt
+    1.000  n=  188   supportedBy^-1 -> supports
+    1.000  n=  188   supports^-1 -> supportedBy
+    1.000  n=   31   threatenedBy^-1 -> threatens
+    1.000  n=   31   threatens^-1 -> threatenedBy
+    0.841  n=  692   locatedAt^-1 o nearLocation -> adjacentTo
+    0.841  n=  692   nearLocation^-1 o locatedAt -> adjacentTo
+    0.645  n=  444   locatedAt -> occursAt
     0.290  n=  976   locatedAt o adjacentTo -> nearLocation
+    0.290  n=  976   locatedAt o adjacentTo^-1 -> nearLocation
+    0.096  n=   74   adjacentTo o hasWeather -> hasWeather
+    0.096  n=   74   adjacentTo^-1 o hasWeather -> hasWeather
+    0.054  n=   24   nearLocation^-1 o hasObstacle -> hasTerrain
+    validation: max             min_conf 0.0    tail MRR 0.1996
+    validation: max             min_conf 0.01   tail MRR 0.1934
+    validation: max             min_conf 0.1    tail MRR 0.1732
+    validation: noisy-or        min_conf 0.0    tail MRR 0.1960
+    validation: noisy-or        min_conf 0.01   tail MRR 0.1920
+    validation: noisy-or        min_conf 0.1    tail MRR 0.1732
+    validation: noisy-or-paths  min_conf 0.0    tail MRR 0.2171
+    validation: noisy-or-paths  min_conf 0.01   tail MRR 0.2122
+    validation: noisy-or-paths  min_conf 0.1    tail MRR 0.1732
+  selected on validation: noisy-or-paths, min_conf 0.0
 
 === probe: path (no training) ===
   overall   MRR 0.1026  H@1 0.0993  H@10 0.1035  (n=1255)
@@ -14,13 +38,22 @@ mined 2-hop rules (confidence, support, rule):
   general        MRR 0.0042  H@1 0.0005  H@10 0.0052  (n=422)
 
 === probe: rule (no training) ===
-  overall   MRR 0.1026  H@1 0.0993  H@10 0.1035  (n=1255)
-  symmetric      MRR 0.0042  H@1 0.0005  H@10 0.0052  (n=218)
-  antisymmetric  MRR 0.0042  H@1 0.0005  H@10 0.0052  (n=93)
-  inverse        MRR 0.0042  H@1 0.0005  H@10 0.0052  (n=36)
-  composition    MRR 0.6645  H@1 0.6633  H@10 0.6649  (n=187)
-  N-N            MRR 0.0042  H@1 0.0005  H@10 0.0052  (n=299)
-  general        MRR 0.0042  H@1 0.0005  H@10 0.0052  (n=422)
+  overall   MRR 0.2291  H@1 0.2176  H@10 0.2481  (n=1255)
+  symmetric      MRR 0.5367  H@1 0.5321  H@10 0.5398  (n=218)
+  antisymmetric  MRR 0.0204  H@1 0.0114  H@10 0.0330  (n=93)
+  inverse        MRR 0.0274  H@1 0.0093  H@10 0.0424  (n=36)
+  composition    MRR 0.6689  H@1 0.6631  H@10 0.6684  (n=187)
+  N-N            MRR 0.0230  H@1 0.0084  H@10 0.0494  (n=299)
+  general        MRR 0.0844  H@1 0.0692  H@10 0.1168  (n=422)
+
+=== probe: type (no training) ===
+  overall   MRR 0.0487  H@1 0.0119  H@10 0.1112  (n=1255)
+  symmetric      MRR 0.0231  H@1 0.0037  H@10 0.0375  (n=218)
+  antisymmetric  MRR 0.0188  H@1 0.0029  H@10 0.0294  (n=93)
+  inverse        MRR 0.0206  H@1 0.0033  H@10 0.0327  (n=36)
+  composition    MRR 0.0240  H@1 0.0039  H@10 0.0393  (n=187)
+  N-N            MRR 0.0314  H@1 0.0055  H@10 0.0547  (n=299)
+  general        MRR 0.0940  H@1 0.0270  H@10 0.2461  (n=422)
 
 === probe: freq (no training) ===
   overall   MRR 0.0481  H@1 0.0100  H@10 0.1065  (n=1255)

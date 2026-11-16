@@ -59,6 +59,31 @@ python c2kg_runner.py sweep --data ../data/c2kg_L --out ../runs/sens_m12_L.json 
 python c2kg_runner.py final --data ../data/c2kg_L --out ../runs/sens_m12_L.json --margin 12 --models transe rotate --no-ws --seeds 0 1 2 --device cuda
 ```
 
+## Check of the warm-started encoder with an active encoder
+
+On C2KG-L the encoder rate selected for WS-RGCN (3e-2) leaves the encoder
+almost unchanged. This run repeats WS-RGCN with the encoder rate fixed at
+3e-4 (all other rates as selected on C2KG-L, `results/rates_L_ws_active.json`)
+together with its RotatE control:
+
+```
+python c2kg_runner.py final --data ../data/c2kg_L --out ../runs/ws_active_L.json --rates-from ../results/rates_L_ws_active.json --models rotate --device cuda
+```
+
+## Training-free analyses (CPU, seconds to minutes)
+
+```
+python check_schema.py > ../results/schema_check.txt
+python leakage_audit.py --data ../data/c2kg_L --rule locatedAt,adjacentTo,nearLocation > ../results/audit_L.txt
+python leakage_audit.py --data ../data/wn18rr_O > ../results/audit_wn_O.txt
+python audit_sensitivity.py > ../results/audit_threshold_sensitivity.txt
+python path_probe.py --data ../data/c2kg_L --probe all --rule locatedAt,adjacentTo,nearLocation --out ../results/probe_L.json > ../results/probe_L.txt
+python path_probe.py --data ../data/wn18rr_O --probe all --out ../results/probe_wn_O.json > ../results/probe_wn_O.txt
+```
+
+and likewise for the other folders (`results/README.md` lists every output
+file and its command).
+
 ## Reports
 
 ```
@@ -66,8 +91,7 @@ python c2kg_runner.py report --out ../runs/c2kg_L.json
 python wn18rr_runner.py report --out ../runs/wn_O.json
 ```
 
-The audits, training-free baselines and threshold sensitivity of the audit
-do not involve training and are in `results/` already.
+The result files of these runs are in `results/runs/` (gzip-compressed).
 
 ## Analysis plan (fixed before the v1.1 runs)
 
@@ -89,3 +113,9 @@ do not involve training and are in `results/` already.
 * Sensitivity (batch 4096, d = 128, margin 6 and 12, 640 epochs): whether
   the order of the models, the penalty of the shared rate and the gain of
   stage 2 persist.
+
+Added after the runs (v1.1.1, no training involved): the rule baseline with
+inverse edges in `path_probe.py`, whose aggregation and minimum confidence
+are selected on the validation set; the reverse-direction (premise) counts
+of the composition rule in `leakage_audit.py`; `check_schema.py`. These
+were not part of the analysis plan above and are reported as such.

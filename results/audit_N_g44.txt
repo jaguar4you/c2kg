@@ -44,6 +44,8 @@ hasMission                                    6     0 (  0.0%)     0 (  0.0%)   
 
 --- composition leakage (supplied rules) ---
   locatedAt o adjacentTo -> nearLocation: 111/183 (60.7%) of held-out nearLocation triples are derivable from training edges
+  premise adjacentTo: 68/150 (45.3%) of held-out adjacentTo triples follow from locatedAt^-1 o nearLocation in training; 110 (73.3%) including the mirrored premise, adjacentTo being symmetric [locatedAt has one value for 676/676 heads]
+  premise locatedAt: 27/98 (27.6%) of held-out locatedAt triples have a unique object consistent with the training nearLocation and adjacentTo edges of their subject (29 subjects have nearLocation edges in training)
 
 Note: a high mirror rate is a property of the split, not proof of a defect.
 Report it and let the reader judge how much of the score is retrieval.

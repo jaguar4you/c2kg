@@ -4,7 +4,7 @@ ontology.py
 Type assignment for every entity (derived from its name prefix) and
 domain/range constraints for every relation, both used by the
 type-constrained metrics that train_eval.py reports alongside the
-unconstrained ones (the paper reports only the unconstrained metrics).
+unconstrained ones (the paper reports the tail-side type-constrained MRR).
 
 Entity types
   UNIT        -- friendly or enemy fighting unit (BN/CO/PLT)
@@ -39,24 +39,28 @@ def entity_type(name):
 
 
 # Domain (valid head types) and range (valid tail types) for every
-# relation in the C2KG ontology.  These mirror the METT-TC
-# semantics encoded by the generator (data_gen.py).
+# relation in the C2KG ontology, exactly as produced by the generator
+# (data_gen.py); check_schema.py verifies every triple against this table.
+# v1.1.1 corrects the domains of locatedAt, usesEquipment, movesTo,
+# hasObstacle and occursAt, which in v1.1.0 did not match the generator.  The
+# ranges were correct, so only head-side type-constrained metrics were
+# affected.
 RELATION_DOMAIN_RANGE = {
     # command hierarchy
     "belongsTo":       ({"UNIT"},                {"UNIT"}),
     "commands":        ({"COMMANDER"},           {"UNIT"}),
     # spatial / temporal context
-    "locatedAt":       ({"UNIT"},                {"LOCATION"}),
-    "occursAt":        ({"ENGAGEMENT", "MOVEMENT"}, {"LOCATION"}),
+    "locatedAt":       ({"UNIT", "ENGAGEMENT"},  {"LOCATION"}),
+    "occursAt":        ({"ENGAGEMENT"},          {"LOCATION"}),
     "occursAtTime":    ({"ENGAGEMENT", "MOVEMENT"}, {"TIME"}),
     # event participation
     "hasParticipant":  ({"ENGAGEMENT"},          {"UNIT"}),
-    "usesEquipment":   ({"UNIT"},                {"EQUIPMENT"}),
+    "usesEquipment":   ({"UNIT", "ENGAGEMENT"},  {"EQUIPMENT"}),
     # mission / planning
     "hasMission":      ({"UNIT"},                {"MISSION"}),
     "hasDeadline":     ({"MISSION"},             {"TIME"}),
     # movement
-    "movesTo":         ({"UNIT"},                {"LOCATION"}),
+    "movesTo":         ({"MOVEMENT"},            {"LOCATION"}),
     "hasOrigin":       ({"MOVEMENT"},            {"LOCATION"}),
     "executesMove":    ({"UNIT"},                {"MOVEMENT"}),
     # combat
@@ -71,7 +75,7 @@ RELATION_DOMAIN_RANGE = {
     "nearLocation":    ({"UNIT"},                {"LOCATION"}),
     "hasTerrain":      ({"LOCATION"},            {"TERRAIN"}),
     "hasWeather":      ({"LOCATION"},            {"WEATHER"}),
-    "hasObstacle":     ({"LOCATION"},            {"TERRAIN"}),
+    "hasObstacle":     ({"UNIT"},                {"TERRAIN"}),
 }
 
 

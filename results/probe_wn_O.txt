@@ -1,0 +1,43 @@
+dataset ../data/wn18rr_O: 40943 entities, train 86835, test 3134
+NOTE: tail-side queries only; compare with the tail-only MRR of the trained models.
+
+[path] skipped: no --rule supplied
+mined 375 rules; highest confidence (at least 10 supporting triples):
+    0.932  n=27701   _derivationally_related_form^-1 -> _derivationally_related_form
+    0.931  n= 1060   _verb_group^-1 -> _verb_group
+    0.925  n=   74   _similar_to^-1 -> _similar_to
+    0.637  n=  828   _also_see^-1 -> _also_see
+    0.477  n=   21   _member_meronym o _synset_domain_topic_of -> _synset_domain_topic_of
+    0.410  n=  144   _has_part o _instance_hypernym^-1 -> _has_part
+    0.395  n=  100   _instance_hypernym o _synset_domain_topic_of -> _synset_domain_topic_of
+    0.386  n=   39   _verb_group^-1 o _synset_domain_topic_of -> _synset_domain_topic_of
+    0.375  n=   39   _verb_group o _synset_domain_topic_of -> _synset_domain_topic_of
+    0.304  n=  657   _derivationally_related_form o _verb_group^-1 -> _derivationally_related_form
+    0.304  n=  662   _derivationally_related_form o _verb_group -> _derivationally_related_form
+    0.299  n=  643   _derivationally_related_form^-1 o _verb_group^-1 -> _derivationally_related_form
+    0.299  n=  645   _verb_group o _derivationally_related_form^-1 -> _derivationally_related_form
+    0.298  n=  647   _derivationally_related_form^-1 o _verb_group -> _derivationally_related_form
+    0.297  n=  648   _verb_group^-1 o _derivationally_related_form^-1 -> _derivationally_related_form
+    validation: max             min_conf 0.0    tail MRR 0.3970
+    validation: max             min_conf 0.01   tail MRR 0.3928
+    validation: max             min_conf 0.1    tail MRR 0.3668
+    validation: noisy-or        min_conf 0.0    tail MRR 0.3972
+    validation: noisy-or        min_conf 0.01   tail MRR 0.3931
+    validation: noisy-or        min_conf 0.1    tail MRR 0.3668
+    validation: noisy-or-paths  min_conf 0.0    tail MRR 0.3955
+    validation: noisy-or-paths  min_conf 0.01   tail MRR 0.3914
+    validation: noisy-or-paths  min_conf 0.1    tail MRR 0.3658
+  selected on validation: noisy-or, min_conf 0.0
+
+[type] skipped: relations not in ontology.py (C2KG only)
+=== probe: rule (no training) ===
+  overall   MRR 0.3977  H@1 0.3851  H@10 0.4206  (n=3134)
+  symmetric      MRR 0.9342  H@1 0.9296  H@10 0.9430  (n=1172)
+  general        MRR 0.0772  H@1 0.0598  H@10 0.1086  (n=1962)
+
+=== probe: freq (no training) ===
+  overall   MRR 0.0346  H@1 0.0204  H@10 0.0614  (n=3134)
+  symmetric      MRR 0.0010  H@1 0.0000  H@10 0.0004  (n=1172)
+  general        MRR 0.0547  H@1 0.0326  H@10 0.0979  (n=1962)
+
+written to ../results/probe_wn_O.json

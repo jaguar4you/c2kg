@@ -1,0 +1,243 @@
+graph of c2kg_L: 12573 triples
+  PASS  typing: entities                                        checked  1923  violations 0
+  PASS  typing: domain and range                                checked 12573  violations 0
+  PASS  symmetric: adjacentTo                                   checked  1548  violations 0
+  PASS  symmetric: alliedWith                                   checked   612  violations 0
+  PASS  antisymmetric: belongsTo                                checked   288  violations 0  (same type)
+  PASS  antisymmetric: supports                                 checked   244  violations 0  (same type)
+  PASS  antisymmetric: threatens                                checked    43  violations 0  (same type)
+  PASS  antisymmetric: commands                                 checked    90  violations 0  (type-separated)
+  PASS  antisymmetric: executesMove                             checked   440  violations 0  (type-separated)
+  PASS  inverse: supports / supportedBy                         checked   244  violations 0
+  PASS  inverse: threatens / threatenedBy                       checked    43  violations 0
+  PASS  composition: locatedAt o adjacentTo = nearLocation      checked  1800  violations 0  (units)
+  PASS  co-reference: occursAt = locatedAt                      checked   560  violations 0  (engagements)
+  PASS  hierarchy: unit -> parent                               checked   306  violations 0  (platoon -> company -> battalion)
+  PASS  hierarchy: one commander per battalion and company      checked    90  violations 0
+  PASS  force: supports, alliedWith within one force            checked   856  violations 0
+  PASS  force: threatens enemy -> friendly                      checked    43  violations 0
+  PASS  force: defends by friendly units                        checked    84  violations 0
+  PASS  force: one friendly and one enemy participant           checked   560  violations 0  (company or platoon)
+  PASS  functional: locatedAt (units, engagements)              checked   866  violations 0
+  PASS  functional: occursAtTime (engagements, movements)       checked  1000  violations 0
+  PASS  functional: movement origin, destination, executor      checked   440  violations 0  (destination differs from origin)
+  PASS  functional: hasTerrain, hasWeather (locations)          checked   260  violations 0
+  PASS  connectivity: adjacentTo                                checked   260  violations 0
+  free cardinalities (value: count):
+    missions per battalion/company           1: 90
+    deadlines per assigned mission           1: 36, 2: 17, 3: 6
+    units per assigned mission               1: 35, 2: 17, 3: 7
+    equipment per unit                       1: 73, 2: 75, 3: 79, 4: 79
+    equipment per engagement                 1: 175, 2: 207, 3: 178
+    obstacles per unit                       0: 192, 1: 114
+    defended locations per friendly unit     0: 69, 1: 84
+
+graph of c2kg_L_g43: 12535 triples
+  PASS  typing: entities                                        checked  1918  violations 0
+  PASS  typing: domain and range                                checked 12535  violations 0
+  PASS  symmetric: adjacentTo                                   checked  1514  violations 0
+  PASS  symmetric: alliedWith                                   checked   610  violations 0
+  PASS  antisymmetric: belongsTo                                checked   288  violations 0  (same type)
+  PASS  antisymmetric: supports                                 checked   244  violations 0  (same type)
+  PASS  antisymmetric: threatens                                checked    43  violations 0  (same type)
+  PASS  antisymmetric: commands                                 checked    90  violations 0  (type-separated)
+  PASS  antisymmetric: executesMove                             checked   440  violations 0  (type-separated)
+  PASS  inverse: supports / supportedBy                         checked   244  violations 0
+  PASS  inverse: threatens / threatenedBy                       checked    43  violations 0
+  PASS  composition: locatedAt o adjacentTo = nearLocation      checked  1806  violations 0  (units)
+  PASS  co-reference: occursAt = locatedAt                      checked   560  violations 0  (engagements)
+  PASS  hierarchy: unit -> parent                               checked   306  violations 0  (platoon -> company -> battalion)
+  PASS  hierarchy: one commander per battalion and company      checked    90  violations 0
+  PASS  force: supports, alliedWith within one force            checked   854  violations 0
+  PASS  force: threatens enemy -> friendly                      checked    43  violations 0
+  PASS  force: defends by friendly units                        checked    86  violations 0
+  PASS  force: one friendly and one enemy participant           checked   560  violations 0  (company or platoon)
+  PASS  functional: locatedAt (units, engagements)              checked   866  violations 0
+  PASS  functional: occursAtTime (engagements, movements)       checked  1000  violations 0
+  PASS  functional: movement origin, destination, executor      checked   440  violations 0  (destination differs from origin)
+  PASS  functional: hasTerrain, hasWeather (locations)          checked   260  violations 0
+  PASS  connectivity: adjacentTo                                checked   260  violations 0
+  free cardinalities (value: count):
+    missions per battalion/company           1: 90
+    deadlines per assigned mission           1: 32, 2: 14, 3: 6, 4: 1, 7: 1
+    units per assigned mission               1: 32, 2: 13, 3: 7, 4: 1, 7: 1
+    equipment per unit                       1: 71, 2: 75, 3: 83, 4: 77
+    equipment per engagement                 1: 197, 2: 166, 3: 197
+    obstacles per unit                       0: 202, 1: 104
+    defended locations per friendly unit     0: 67, 1: 86
+
+graph of c2kg_L_g44: 12555 triples
+  PASS  typing: entities                                        checked  1923  violations 0
+  PASS  typing: domain and range                                checked 12555  violations 0
+  PASS  symmetric: adjacentTo                                   checked  1538  violations 0
+  PASS  symmetric: alliedWith                                   checked   610  violations 0
+  PASS  antisymmetric: belongsTo                                checked   288  violations 0  (same type)
+  PASS  antisymmetric: supports                                 checked   244  violations 0  (same type)
+  PASS  antisymmetric: threatens                                checked    43  violations 0  (same type)
+  PASS  antisymmetric: commands                                 checked    90  violations 0  (type-separated)
+  PASS  antisymmetric: executesMove                             checked   440  violations 0  (type-separated)
+  PASS  inverse: supports / supportedBy                         checked   244  violations 0
+  PASS  inverse: threatens / threatenedBy                       checked    43  violations 0
+  PASS  composition: locatedAt o adjacentTo = nearLocation      checked  1842  violations 0  (units)
+  PASS  co-reference: occursAt = locatedAt                      checked   560  violations 0  (engagements)
+  PASS  hierarchy: unit -> parent                               checked   306  violations 0  (platoon -> company -> battalion)
+  PASS  hierarchy: one commander per battalion and company      checked    90  violations 0
+  PASS  force: supports, alliedWith within one force            checked   854  violations 0
+  PASS  force: threatens enemy -> friendly                      checked    43  violations 0
+  PASS  force: defends by friendly units                        checked    71  violations 0
+  PASS  force: one friendly and one enemy participant           checked   560  violations 0  (company or platoon)
+  PASS  functional: locatedAt (units, engagements)              checked   866  violations 0
+  PASS  functional: occursAtTime (engagements, movements)       checked  1000  violations 0
+  PASS  functional: movement origin, destination, executor      checked   440  violations 0  (destination differs from origin)
+  PASS  functional: hasTerrain, hasWeather (locations)          checked   260  violations 0
+  PASS  connectivity: adjacentTo                                checked   260  violations 0
+  free cardinalities (value: count):
+    missions per battalion/company           1: 90
+    deadlines per assigned mission           1: 36, 2: 17, 3: 6
+    units per assigned mission               1: 35, 2: 17, 3: 7
+    equipment per unit                       1: 76, 2: 84, 3: 76, 4: 70
+    equipment per engagement                 1: 191, 2: 192, 3: 177
+    obstacles per unit                       0: 186, 1: 120
+    defended locations per friendly unit     0: 82, 1: 71
+
+graph of c2kg_N: 12573 triples
+  PASS  typing: entities                                        checked  1923  violations 0
+  PASS  typing: domain and range                                checked 12573  violations 0
+  PASS  symmetric: adjacentTo                                   checked  1548  violations 0
+  PASS  symmetric: alliedWith                                   checked   612  violations 0
+  PASS  antisymmetric: belongsTo                                checked   288  violations 0  (same type)
+  PASS  antisymmetric: supports                                 checked   244  violations 0  (same type)
+  PASS  antisymmetric: threatens                                checked    43  violations 0  (same type)
+  PASS  antisymmetric: commands                                 checked    90  violations 0  (type-separated)
+  PASS  antisymmetric: executesMove                             checked   440  violations 0  (type-separated)
+  PASS  inverse: supports / supportedBy                         checked   244  violations 0
+  PASS  inverse: threatens / threatenedBy                       checked    43  violations 0
+  PASS  composition: locatedAt o adjacentTo = nearLocation      checked  1800  violations 0  (units)
+  PASS  co-reference: occursAt = locatedAt                      checked   560  violations 0  (engagements)
+  PASS  hierarchy: unit -> parent                               checked   306  violations 0  (platoon -> company -> battalion)
+  PASS  hierarchy: one commander per battalion and company      checked    90  violations 0
+  PASS  force: supports, alliedWith within one force            checked   856  violations 0
+  PASS  force: threatens enemy -> friendly                      checked    43  violations 0
+  PASS  force: defends by friendly units                        checked    84  violations 0
+  PASS  force: one friendly and one enemy participant           checked   560  violations 0  (company or platoon)
+  PASS  functional: locatedAt (units, engagements)              checked   866  violations 0
+  PASS  functional: occursAtTime (engagements, movements)       checked  1000  violations 0
+  PASS  functional: movement origin, destination, executor      checked   440  violations 0  (destination differs from origin)
+  PASS  functional: hasTerrain, hasWeather (locations)          checked   260  violations 0
+  PASS  connectivity: adjacentTo                                checked   260  violations 0
+  free cardinalities (value: count):
+    missions per battalion/company           1: 90
+    deadlines per assigned mission           1: 36, 2: 17, 3: 6
+    units per assigned mission               1: 35, 2: 17, 3: 7
+    equipment per unit                       1: 73, 2: 75, 3: 79, 4: 79
+    equipment per engagement                 1: 175, 2: 207, 3: 178
+    obstacles per unit                       0: 192, 1: 114
+    defended locations per friendly unit     0: 69, 1: 84
+
+graph of c2kg_N_blocked: 12573 triples
+  PASS  typing: entities                                        checked  1923  violations 0
+  PASS  typing: domain and range                                checked 12573  violations 0
+  PASS  symmetric: adjacentTo                                   checked  1548  violations 0
+  PASS  symmetric: alliedWith                                   checked   612  violations 0
+  PASS  antisymmetric: belongsTo                                checked   288  violations 0  (same type)
+  PASS  antisymmetric: supports                                 checked   244  violations 0  (same type)
+  PASS  antisymmetric: threatens                                checked    43  violations 0  (same type)
+  PASS  antisymmetric: commands                                 checked    90  violations 0  (type-separated)
+  PASS  antisymmetric: executesMove                             checked   440  violations 0  (type-separated)
+  PASS  inverse: supports / supportedBy                         checked   244  violations 0
+  PASS  inverse: threatens / threatenedBy                       checked    43  violations 0
+  PASS  composition: locatedAt o adjacentTo = nearLocation      checked  1800  violations 0  (units)
+  PASS  co-reference: occursAt = locatedAt                      checked   560  violations 0  (engagements)
+  PASS  hierarchy: unit -> parent                               checked   306  violations 0  (platoon -> company -> battalion)
+  PASS  hierarchy: one commander per battalion and company      checked    90  violations 0
+  PASS  force: supports, alliedWith within one force            checked   856  violations 0
+  PASS  force: threatens enemy -> friendly                      checked    43  violations 0
+  PASS  force: defends by friendly units                        checked    84  violations 0
+  PASS  force: one friendly and one enemy participant           checked   560  violations 0  (company or platoon)
+  PASS  functional: locatedAt (units, engagements)              checked   866  violations 0
+  PASS  functional: occursAtTime (engagements, movements)       checked  1000  violations 0
+  PASS  functional: movement origin, destination, executor      checked   440  violations 0  (destination differs from origin)
+  PASS  functional: hasTerrain, hasWeather (locations)          checked   260  violations 0
+  PASS  connectivity: adjacentTo                                checked   260  violations 0
+  free cardinalities (value: count):
+    missions per battalion/company           1: 90
+    deadlines per assigned mission           1: 36, 2: 17, 3: 6
+    units per assigned mission               1: 35, 2: 17, 3: 7
+    equipment per unit                       1: 73, 2: 75, 3: 79, 4: 79
+    equipment per engagement                 1: 175, 2: 207, 3: 178
+    obstacles per unit                       0: 192, 1: 114
+    defended locations per friendly unit     0: 69, 1: 84
+
+graph of c2kg_N_g43: 12535 triples
+  PASS  typing: entities                                        checked  1918  violations 0
+  PASS  typing: domain and range                                checked 12535  violations 0
+  PASS  symmetric: adjacentTo                                   checked  1514  violations 0
+  PASS  symmetric: alliedWith                                   checked   610  violations 0
+  PASS  antisymmetric: belongsTo                                checked   288  violations 0  (same type)
+  PASS  antisymmetric: supports                                 checked   244  violations 0  (same type)
+  PASS  antisymmetric: threatens                                checked    43  violations 0  (same type)
+  PASS  antisymmetric: commands                                 checked    90  violations 0  (type-separated)
+  PASS  antisymmetric: executesMove                             checked   440  violations 0  (type-separated)
+  PASS  inverse: supports / supportedBy                         checked   244  violations 0
+  PASS  inverse: threatens / threatenedBy                       checked    43  violations 0
+  PASS  composition: locatedAt o adjacentTo = nearLocation      checked  1806  violations 0  (units)
+  PASS  co-reference: occursAt = locatedAt                      checked   560  violations 0  (engagements)
+  PASS  hierarchy: unit -> parent                               checked   306  violations 0  (platoon -> company -> battalion)
+  PASS  hierarchy: one commander per battalion and company      checked    90  violations 0
+  PASS  force: supports, alliedWith within one force            checked   854  violations 0
+  PASS  force: threatens enemy -> friendly                      checked    43  violations 0
+  PASS  force: defends by friendly units                        checked    86  violations 0
+  PASS  force: one friendly and one enemy participant           checked   560  violations 0  (company or platoon)
+  PASS  functional: locatedAt (units, engagements)              checked   866  violations 0
+  PASS  functional: occursAtTime (engagements, movements)       checked  1000  violations 0
+  PASS  functional: movement origin, destination, executor      checked   440  violations 0  (destination differs from origin)
+  PASS  functional: hasTerrain, hasWeather (locations)          checked   260  violations 0
+  PASS  connectivity: adjacentTo                                checked   260  violations 0
+  free cardinalities (value: count):
+    missions per battalion/company           1: 90
+    deadlines per assigned mission           1: 32, 2: 14, 3: 6, 4: 1, 7: 1
+    units per assigned mission               1: 32, 2: 13, 3: 7, 4: 1, 7: 1
+    equipment per unit                       1: 71, 2: 75, 3: 83, 4: 77
+    equipment per engagement                 1: 197, 2: 166, 3: 197
+    obstacles per unit                       0: 202, 1: 104
+    defended locations per friendly unit     0: 67, 1: 86
+
+graph of c2kg_N_g44: 12555 triples
+  PASS  typing: entities                                        checked  1923  violations 0
+  PASS  typing: domain and range                                checked 12555  violations 0
+  PASS  symmetric: adjacentTo                                   checked  1538  violations 0
+  PASS  symmetric: alliedWith                                   checked   610  violations 0
+  PASS  antisymmetric: belongsTo                                checked   288  violations 0  (same type)
+  PASS  antisymmetric: supports                                 checked   244  violations 0  (same type)
+  PASS  antisymmetric: threatens                                checked    43  violations 0  (same type)
+  PASS  antisymmetric: commands                                 checked    90  violations 0  (type-separated)
+  PASS  antisymmetric: executesMove                             checked   440  violations 0  (type-separated)
+  PASS  inverse: supports / supportedBy                         checked   244  violations 0
+  PASS  inverse: threatens / threatenedBy                       checked    43  violations 0
+  PASS  composition: locatedAt o adjacentTo = nearLocation      checked  1842  violations 0  (units)
+  PASS  co-reference: occursAt = locatedAt                      checked   560  violations 0  (engagements)
+  PASS  hierarchy: unit -> parent                               checked   306  violations 0  (platoon -> company -> battalion)
+  PASS  hierarchy: one commander per battalion and company      checked    90  violations 0
+  PASS  force: supports, alliedWith within one force            checked   854  violations 0
+  PASS  force: threatens enemy -> friendly                      checked    43  violations 0
+  PASS  force: defends by friendly units                        checked    71  violations 0
+  PASS  force: one friendly and one enemy participant           checked   560  violations 0  (company or platoon)
+  PASS  functional: locatedAt (units, engagements)              checked   866  violations 0
+  PASS  functional: occursAtTime (engagements, movements)       checked  1000  violations 0
+  PASS  functional: movement origin, destination, executor      checked   440  violations 0  (destination differs from origin)
+  PASS  functional: hasTerrain, hasWeather (locations)          checked   260  violations 0
+  PASS  connectivity: adjacentTo                                checked   260  violations 0
+  free cardinalities (value: count):
+    missions per battalion/company           1: 90
+    deadlines per assigned mission           1: 36, 2: 17, 3: 6
+    units per assigned mission               1: 35, 2: 17, 3: 7
+    equipment per unit                       1: 76, 2: 84, 3: 76, 4: 70
+    equipment per engagement                 1: 191, 2: 192, 3: 177
+    obstacles per unit                       0: 186, 1: 120
+    defended locations per friendly unit     0: 82, 1: 71
+
+PASS  graph seed 42: c2kg_L, c2kg_N, c2kg_N_blocked hold the same 12573 triples
+PASS  graph seed 43: c2kg_L_g43, c2kg_N_g43 hold the same 12535 triples
+PASS  graph seed 44: c2kg_L_g44, c2kg_N_g44 hold the same 12555 triples
+
+all schema checks passed
