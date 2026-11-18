@@ -84,6 +84,14 @@ python path_probe.py --data ../data/wn18rr_O --probe all --out ../results/probe_
 and likewise for the other folders (`results/README.md` lists every output
 file and its command).
 
+## Tables and numbers of the paper (CPU, a few minutes)
+
+```
+python competency_questions.py --data ../data/c2kg_L > ../results/competency_questions.txt
+python make_tables.py
+python plot_lr_curves.py ../results/paper/lr_curves.json ../results/paper/fig_lr_curves
+```
+
 ## Reports
 
 ```

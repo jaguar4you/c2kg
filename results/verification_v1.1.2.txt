@@ -1,0 +1,22 @@
+Verification of release v1.1.2 (CPU)
+
+Release v1.1.2 adds analysis scripts only; data, trained-model results and
+the training and evaluation code are those of v1.1.1 (code fingerprints
+C2KG c3e0de0de8a0, WN18RR 082930b7ac7b).
+
+1. python test_metrics.py, python check_data.py, python check_schema.py:
+   unchanged results (metrics ok; all data folders match; all schema checks
+   passed).
+
+2. python make_tables.py reads the compressed result files directly; two
+   runs with different PYTHONHASHSEED give identical outputs (the bootstrap
+   uses a fixed seed). Every table body in results/paper/ appears verbatim
+   in the revised manuscript, and every number in the text of its
+   experimental section is found in results/paper/numbers.txt, in the
+   tables, or in the audit and probe outputs (after rounding), apart from
+   published reference values, software versions and simple arithmetic on
+   them.
+
+3. python competency_questions.py on the three graphs: results in
+   competency_questions.txt; the counts were cross-checked with an
+   independent query over the triples.

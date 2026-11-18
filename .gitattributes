@@ -6,3 +6,6 @@
 *.md   text eol=lf
 *.cff  text eol=lf
 *.gz   binary
+*.tex  text eol=lf
+*.svg  text eol=lf
+*.pdf  binary

@@ -1,0 +1,214 @@
+== 0. Result files
+  c2kg_L           runs  163  data c64839834e08  code 9180722b6c77  bs 512  d 64  margin 9.0  epochs 160
+  c2kg_L_g43       runs   57  data 695f0696f57c  code 9180722b6c77  bs 512  d 64  margin 9.0  epochs 160
+  c2kg_L_g44       runs   57  data f9ca8b0accc5  code 9180722b6c77  bs 512  d 64  margin 9.0  epochs 160
+  c2kg_N           runs  150  data 5d3f9bb15156  code 9180722b6c77  bs 512  d 64  margin 9.0  epochs 160
+  c2kg_N_g43       runs   48  data 2fbef686a58d  code 9180722b6c77  bs 512  d 64  margin 9.0  epochs 160
+  c2kg_N_g44       runs   48  data c6f4c72a54c7  code 9180722b6c77  bs 512  d 64  margin 9.0  epochs 160
+  c2kg_Nb          runs   80  data cd539bf9c13b  code 9180722b6c77  bs 512  d 64  margin 9.0  epochs 160
+  ext_L            runs   30  data c64839834e08  code 9180722b6c77  bs 512  d 64  margin 9.0  epochs 640
+  sens_bs4096_L    runs  117  data c64839834e08  code 9180722b6c77  bs 4096  d 64  margin 9.0  epochs 160
+  sens_d128_L      runs  115  data c64839834e08  code 9180722b6c77  bs 512  d 128  margin 9.0  epochs 160
+  sens_m12_L       runs   42  data c64839834e08  code 9180722b6c77  bs 512  d 64  margin 12.0  epochs 160
+  sens_m6_L        runs   38  data c64839834e08  code 9180722b6c77  bs 512  d 64  margin 6.0  epochs 160
+  wn_L             runs   52  data 251af9c1c1b2  code 731a29f5e086  bs 512  d 64  margin 9.0  epochs 160
+  wn_O             runs   52  data ca22fabe2697  code 731a29f5e086  bs 512  d 64  margin 9.0  epochs 160
+  wn_Ob            runs   18  data d0d4c7bff14e  code 731a29f5e086  bs 512  d 64  margin 9.0  epochs 160
+  ws_active_L      runs   20  data c64839834e08  code 9180722b6c77  bs 512  d 64  margin 9.0  epochs 160
+  total training runs 1087; GPU time 47.3 h; largest validation tie fraction 0.0186; largest NaN fraction 0.0000; largest tie fraction C2KG 0.0024, WN18RR 0.0186
+
+== 11. Test sets by pattern
+  c2kg_N: symmetric 205 antisymmetric 94 inverse 24 composition 215 N-N 309 general 410 | antisymmetric same 50 typed 44 | commands in test 0
+  c2kg_L: symmetric 238 antisymmetric 99 inverse 21 composition 174 N-N 313 general 412 | antisymmetric same 45 typed 54 | commands in test 0
+
+== 1. Reference results, C2KG-L (graph 42)
+  RotatE    tail 0.2051 $\pm$ 0.0045  H@1 0.148 H@3 0.207 H@10 0.314  h+t 0.1842 $\pm$ 0.0034  TC 0.2055  n=5
+  WS-RGCN   tail 0.2047 $\pm$ 0.0033  H@1 0.148 H@3 0.207 H@10 0.315  h+t 0.1833 $\pm$ 0.0025  TC 0.2051  n=5
+  ComplEx   tail 0.1345 $\pm$ 0.0094  H@1 0.093 H@3 0.146 H@10 0.217  h+t 0.1214 $\pm$ 0.0076  TC 0.1700  n=5
+  DistMult  tail 0.1164 $\pm$ 0.0086  H@1 0.076 H@3 0.125 H@10 0.192  h+t 0.1063 $\pm$ 0.0073  TC 0.1466  n=5
+  TransE    tail 0.0684 $\pm$ 0.0003  H@1 0.010 H@3 0.063 H@10 0.173  h+t 0.0508 $\pm$ 0.0004  TC 0.0719  n=5
+  CompGCN   tail 0.0517 $\pm$ 0.0163  H@1 0.021 H@3 0.049 H@10 0.109  h+t 0.0452 $\pm$ 0.0146  TC 0.0875  n=5
+  R-GCN     tail 0.0493 $\pm$ 0.0037  H@1 0.021 H@3 0.047 H@10 0.102  h+t 0.0413 $\pm$ 0.0030  TC 0.0741  n=5
+  Rule miner               tail 0.2274 H@1 0.2140 H@10 0.2484
+  Path rule                tail 0.0945 H@1 0.0912 H@10 0.0954
+  Type-constrained random  tail 0.0492 H@1 0.0120 H@10 0.1125
+  Frequency                tail 0.0511 H@1 0.0140 H@10 0.1208
+  rule selected {'aggregation': 'noisy-or-paths', 'min_conf': 0.0, 'valid_tail_MRR': 0.23586553802967478}
+
+== 2. Patterns (TC tail MRR), C2KG-L
+  n Sym.=238 Anti. same=45 Anti. typed=54 Inv.=21 Comp.=174 N-N=313 Gen.=412
+  RotatE    0.322 0.055 0.020 0.034 0.593 0.033 0.155
+  WS-RGCN   0.320 0.050 0.020 0.036 0.593 0.034 0.155
+  ComplEx   0.321 0.028 0.018 0.029 0.372 0.030 0.147
+  DistMult  0.285 0.030 0.015 0.039 0.263 0.031 0.141
+  TransE    0.063 0.031 0.008 0.018 0.087 0.031 0.117
+  CompGCN   0.117 0.033 0.010 0.027 0.150 0.029 0.107
+  R-GCN     0.060 0.045 0.010 0.041 0.151 0.029 0.097
+  Type-constrained random  0.023 0.021 0.015 0.021 0.024 0.031 0.098
+  Rule miner               0.522 0.022 0.017 0.022 0.657 0.015 0.097
+  Frequency                0.014 0.017 0.001 0.032 0.037 0.042 0.097
+
+== 2b. Relations (TC tail MRR), C2KG-L
+  adjacentTo      n=160 0.469 0.467 0.466 0.412 0.083 0.165 0.079 | type 0.024 rule 0.761
+  alliedWith      n= 78 0.021 0.019 0.022 0.024 0.021 0.020 0.021 | type 0.021 rule 0.033
+  belongsTo       n= 24 0.079 0.078 0.020 0.027 0.040 0.038 0.054 | type 0.021 rule 0.031
+  executesMove    n= 54 0.020 0.020 0.018 0.015 0.008 0.010 0.010 | type 0.015 rule 0.017
+  supports        n= 17 0.016 0.016 0.043 0.039 0.023 0.031 0.040 | type 0.021 rule 0.007
+  threatens       n=  4 0.078 0.031 0.010 0.012 0.016 0.010 0.013 | type 0.021 rule 0.028
+  supportedBy     n= 17 0.025 0.025 0.033 0.045 0.017 0.031 0.043 | type 0.021 rule 0.022
+  threatenedBy    n=  4 0.071 0.080 0.010 0.015 0.025 0.009 0.032 | type 0.021 rule 0.022
+  nearLocation    n=174 0.593 0.593 0.372 0.263 0.087 0.150 0.151 | type 0.024 rule 0.657
+  hasParticipant  n=114 0.019 0.020 0.019 0.021 0.019 0.017 0.016 | type 0.021 rule 0.013
+  usesEquipment   n=199 0.042 0.042 0.037 0.036 0.038 0.036 0.037 | type 0.038 rule 0.017
+  defends         n=  3 0.020 0.022 0.024 0.011 0.009 0.082 0.011 | type 0.024 rule 0.018
+  hasDeadline     n= 13 0.093 0.087 0.139 0.091 0.109 0.083 0.102 | type 0.117 rule 0.004
+  hasMission      n=  7 0.041 0.044 0.078 0.070 0.035 0.059 0.058 | type 0.079 rule 0.004
+  hasObstacle     n=  9 0.363 0.372 0.257 0.268 0.196 0.232 0.243 | type 0.232 rule 0.086
+  hasOrigin       n= 39 0.018 0.019 0.016 0.028 0.025 0.030 0.025 | type 0.024 rule 0.015
+  hasTerrain      n= 28 0.198 0.207 0.229 0.217 0.298 0.198 0.211 | type 0.232 rule 0.242
+  hasWeather      n= 38 0.358 0.351 0.337 0.333 0.318 0.331 0.315 | type 0.340 rule 0.196
+  locatedAt       n= 78 0.329 0.328 0.288 0.280 0.165 0.093 0.057 | type 0.024 rule 0.301
+  movesTo         n= 44 0.019 0.026 0.017 0.020 0.012 0.018 0.019 | type 0.024 rule 0.003
+  occursAt        n= 54 0.038 0.037 0.031 0.021 0.016 0.022 0.019 | type 0.024 rule 0.007
+  occursAtTime    n= 99 0.106 0.104 0.111 0.104 0.093 0.119 0.109 | type 0.116 rule 0.004
+  test triples of adjacentTo, nearLocation and unit locatedAt: 358 of 1257 (28.5%)
+  RotatE: TC MRR on these 0.564, on the rest 0.063; type-random rest 0.059
+  ComplEx: TC MRR on these 0.448, on the rest 0.059; type-random rest 0.059
+  rule miner: on these 0.724, on the rest 0.030
+
+== 3. Leakage: C2KG-L, C2KG-N, C2KG-N-blocked (tail MRR)
+  RotatE    L 0.2051 $\pm$ 0.0045  N 0.3647 $\pm$ 0.0053  Nb 0.2156 $\pm$ 0.0032  N/L 1.78  rank L 1 N 2
+  WS-RGCN   L 0.2047 $\pm$ 0.0033  N 0.3650 $\pm$ 0.0043  Nb 0.2152 $\pm$ 0.0033  N/L 1.78  rank L 2 N 1
+  ComplEx   L 0.1345 $\pm$ 0.0094  N 0.2552 $\pm$ 0.0223  Nb 0.0780 $\pm$ 0.0169  N/L 1.90  rank L 3 N 4
+  DistMult  L 0.1164 $\pm$ 0.0086  N 0.2639 $\pm$ 0.0160  Nb 0.1031 $\pm$ 0.0098  N/L 2.27  rank L 4 N 3
+  TransE    L 0.0684 $\pm$ 0.0003  N 0.1690 $\pm$ 0.0005  Nb 0.0719 $\pm$ 0.0005  N/L 2.47  rank L 5 N 7
+  CompGCN   L 0.0517 $\pm$ 0.0163  N 0.2344 $\pm$ 0.0034  Nb 0.0447 $\pm$ 0.0048  N/L 4.54  rank L 6 N 6
+  R-GCN     L 0.0493 $\pm$ 0.0037  N 0.2501 $\pm$ 0.0024  Nb 0.0521 $\pm$ 0.0053  N/L 5.08  rank L 7 N 5
+  Rule miner               L 0.2274 N 0.3891 Nb 0.2419
+  Path rule                L 0.0945 N 0.1096 Nb 0.0977
+  Type-constrained random  L 0.0492 N 0.0432 Nb 0.0432
+  Frequency                L 0.0511 N 0.0465 Nb 0.0465
+  order L: RotatE, WS-RGCN, ComplEx, DistMult, TransE, CompGCN, R-GCN
+  order N: WS-RGCN, RotatE, DistMult, ComplEx, R-GCN, CompGCN, TransE
+  shared rate L: TransE 0.0177 RotatE 0.0105 DistMult 0.0445 ComplEx 0.0406 R-GCN 0.0489 CompGCN 0.0449
+  shared rate N: TransE 0.0245 RotatE 0.0104 DistMult 0.2144 ComplEx 0.2179 R-GCN 0.2450 CompGCN 0.2353
+
+== 3b. Same test triples: C2KG-N against C2KG-N-blocked
+  leaked 248, composition (not leaked) 215, other 794
+  RotatE    leaked 0.987 -> 0.259 | comp 0.570 -> 0.534 | other 0.115 -> 0.116 (diff +0.0006, p=0.568)
+  WS-RGCN   leaked 0.986 -> 0.259 | comp 0.571 -> 0.534 | other 0.115 -> 0.115 (diff +0.0002, p=0.881)
+  ComplEx   leaked 0.933 -> 0.084 | comp 0.221 -> 0.184 | other 0.053 -> 0.047 (diff -0.0054, p=0.618)
+  DistMult  leaked 0.999 -> 0.143 | comp 0.189 -> 0.210 | other 0.055 -> 0.062 (diff +0.0073, p=0.349)
+  TransE    leaked 0.540 -> 0.056 | comp 0.093 -> 0.091 | other 0.074 -> 0.072 (diff -0.0019, p=0.002)
+  CompGCN   leaked 0.999 -> 0.038 | comp 0.113 -> 0.109 | other 0.028 -> 0.029 (diff +0.0011, p=0.663)
+  R-GCN     leaked 0.997 -> 0.044 | comp 0.161 -> 0.127 | other 0.041 -> 0.034 (diff -0.0069, p=0.048)
+  rule miner leaked 1.000 -> 0.368 | comp 0.730 -> 0.625 | other 0.106 -> 0.099
+
+== 4. Learning-rate tuning
+  RotatE    L rates 0.3/0.03  N rates 0.3/0.01  shared 0.0105 $\pm$ 0.0014 (per seed [0.0084, 0.0109, 0.0106, 0.0105, 0.0122])  s1 0.1867 $\pm$ 0.0025  s2 0.2051 $\pm$ 0.0045  s1-shared +0.1762 p=1.8e-08  s2-s1 +0.0183 p=0.00053
+  ComplEx   L rates 0.3/0.03  N rates 0.01/0.1  shared 0.0406 $\pm$ 0.0057 (per seed [0.0318, 0.0421, 0.0424, 0.0472, 0.0395])  s1 0.0735 $\pm$ 0.0115  s2 0.1345 $\pm$ 0.0094  s1-shared +0.0329 p=0.0082  s2-s1 +0.0610 p=0.00017
+  DistMult  L rates 0.3/0.1  N rates 0.3/0.01  shared 0.0445 $\pm$ 0.0019 (per seed [0.0425, 0.0462, 0.0424, 0.0459, 0.0455])  s1 0.0750 $\pm$ 0.0096  s2 0.1164 $\pm$ 0.0086  s1-shared +0.0305 p=0.0032  s2-s1 +0.0414 p=0.0039
+  TransE    L rates 0.3/0.01  N rates 0.3/0.03  shared 0.0177 $\pm$ 0.0125 (per seed [0.0267, 0.0035, 0.0254, 0.0046, 0.0281])  s1 0.0674 $\pm$ 0.0011  s2 0.0684 $\pm$ 0.0003  s1-shared +0.0497 p=0.00082  s2-s1 +0.0011 p=0.062
+  CompGCN   L rates 0.03/0.03  N rates 0.01/0.003  shared 0.0449 $\pm$ 0.0039 (per seed [0.0475, 0.0491, 0.0458, 0.0392, 0.0428])  s1 0.0437 $\pm$ 0.0037  s2 0.0517 $\pm$ 0.0163  s1-shared -0.0012 p=0.67  s2-s1 +0.0080 p=0.3
+  R-GCN     L rates 0.03/0.0003  N rates 0.01/0.03  shared 0.0489 $\pm$ 0.0021 (per seed [0.0463, 0.0482, 0.048, 0.0501, 0.0518])  s1 0.0521 $\pm$ 0.0074  s2 0.0493 $\pm$ 0.0037  s1-shared +0.0033 p=0.47  s2-s1 -0.0029 p=0.21
+  WS-RGCN rates L lr1 0.3 emb 0.03 gnn 0.03; N lr1 0.3 emb 0.01 gnn 0.0003
+  L: shared order R-GCN, CompGCN, DistMult, ComplEx, TransE, RotatE; tuned order RotatE, ComplEx, DistMult, TransE, CompGCN, R-GCN; Spearman -0.83
+  N: shared order R-GCN, CompGCN, ComplEx, DistMult, TransE, RotatE; tuned order RotatE, DistMult, ComplEx, R-GCN, CompGCN, TransE; Spearman -0.37
+  best epochs stage 1 (L): RotatE [150, 150, 160, 160, 120], TransE [160, 105, 160, 90, 150]
+
+== 4b. Learning-rate curves (C2KG-L, stage 1, seed 0, validation)
+  TransE    0.01:0.0143  0.03:0.0219  0.1:0.0415  0.3:0.0504  1:0.0484  3:0.0360  10:0.0299
+  RotatE    0.01:0.0095  0.03:0.0139  0.1:0.0958  0.3:0.1758  1:0.1399  3:0.0575  10:0.0073
+  DistMult  0.001:0.0188  0.003:0.0296  0.01:0.0265  0.03:0.0255  0.1:0.0423  0.3:0.0741  1:0.0125
+  ComplEx   0.001:0.0239  0.003:0.0337  0.01:0.0326  0.03:0.0340  0.1:0.0743  0.3:0.0800  1:0.0480
+  R-GCN     0.001:0.0315  0.003:0.0339  0.01:0.0359  0.03:0.0471  0.1:0.0303
+  CompGCN   0.001:0.0289  0.003:0.0284  0.01:0.0329  0.03:0.0331  0.1:0.0240
+
+== 5. 640 epochs (C2KG-L)
+  TransE  shared@640 0.0421 $\pm$ 0.0347 per seed [0.066, 0.003, 0.068, 0.005, 0.068] best epochs [640, 15, 640, 15, 640]
+          s1@640 0.0675 $\pm$ 0.0027 (best epochs [165, 105, 210, 90, 255]) vs s1@160 0.0674 $\pm$ 0.0011: +0.0001 p=0.95
+          s2 after 640 0.0687 $\pm$ 0.0008: s2-s1@640 +0.0013 p=0.25; s2@160 0.0684 $\pm$ 0.0003
+  RotatE  shared@640 0.1467 $\pm$ 0.0756 per seed [0.18, 0.012, 0.186, 0.18, 0.175] best epochs [640, 180, 640, 640, 640]
+          s1@640 0.1892 $\pm$ 0.0056 (best epochs [165, 255, 180, 180, 180]) vs s1@160 0.1867 $\pm$ 0.0025: +0.0024 p=0.43
+          s2 after 640 0.2072 $\pm$ 0.0044: s2-s1@640 +0.0181 p=0.0046; s2@160 0.2051 $\pm$ 0.0045
+
+== 6. Sensitivity (C2KG-L, three seeds, rates selected again)
+  Main (batch 512, $d=64$, $\gamma=9$) RotatE 0.205 ComplEx 0.134 DistMult 0.116 TransE 0.068 CompGCN 0.052 R-GCN 0.049 | shared TransE/RotatE 0.0177/0.0105 | RotatE s2-s1 +0.0183 | Spearman $-$0.83
+      shared: TransE 0.0177 RotatE 0.0105 DistMult 0.0445 ComplEx 0.0406 R-GCN 0.0489 CompGCN 0.0449 | s1: TransE 0.0674 RotatE 0.1867 DistMult 0.0750 ComplEx 0.0735 R-GCN 0.0521 CompGCN 0.0437 | rates TransE 0.3/0.01 RotatE 0.3/0.03 DistMult 0.3/0.1 ComplEx 0.3/0.03 R-GCN 0.03/0.0003 CompGCN 0.03/0.03
+  Batch 4096                 RotatE 0.201 ComplEx 0.061 DistMult 0.052 TransE 0.069 CompGCN 0.047 R-GCN 0.050 | shared TransE/RotatE 0.0038/0.0046 | RotatE s2-s1 +0.0659 | Spearman $-$0.89
+      shared: TransE 0.0038 RotatE 0.0046 DistMult 0.0458 ComplEx 0.0451 R-GCN 0.0514 CompGCN 0.0463 | s1: TransE 0.0721 RotatE 0.1350 DistMult 0.0389 ComplEx 0.0409 R-GCN 0.0500 CompGCN 0.0463 | rates TransE 1/0.3 RotatE 3/0.1 DistMult 0.1/0.3 ComplEx 0.1/0.03 R-GCN 0.003/None CompGCN 0.01/0.0001
+  $d=128$                    RotatE 0.219 ComplEx 0.182 DistMult 0.149 TransE 0.068 CompGCN 0.054 R-GCN 0.073 | shared TransE/RotatE 0.0350/0.0129 | RotatE s2-s1 +0.0131 | Spearman $-$0.49
+      shared: TransE 0.0350 RotatE 0.0129 DistMult 0.0445 ComplEx 0.0494 R-GCN 0.0606 CompGCN 0.0499 | s1: TransE 0.0678 RotatE 0.2055 DistMult 0.0863 ComplEx 0.0849 R-GCN 0.0606 CompGCN 0.0452 | rates TransE 0.3/0.0001 RotatE 0.3/0.03 DistMult 0.3/0.03 ComplEx 0.1/0.03 R-GCN 0.01/0.03 CompGCN 0.003/0.01
+  $\gamma=6$                 RotatE 0.191 ComplEx -- DistMult -- TransE 0.072 CompGCN -- R-GCN -- | shared TransE/RotatE 0.0345/0.0107 | RotatE s2-s1 +0.0148 | Spearman --
+  $\gamma=12$                RotatE 0.212 ComplEx -- DistMult -- TransE 0.070 CompGCN -- R-GCN -- | shared TransE/RotatE 0.0039/0.0051 | RotatE s2-s1 +0.0295 | Spearman --
+
+== 7. Continuation control (WS-RGCN against RotatE)
+  L, graph 42                      n=5 s1 0.1867 s2 0.2051 WS 0.2047 | WS-s1 +0.0179 (p=6.9e-05) | WS-s2 -0.0004 sd 0.0021 TOST p=0.00024 90% CI [-0.0023, +0.0016] | encoder change 0.00-0.01
+  L, graph 43                      n=3 s1 0.2066 s2 0.2213 WS 0.2221 | WS-s1 +0.0155 (p=0.025) | WS-s2 +0.0008 sd 0.0018 TOST p=0.0062 90% CI [-0.0022, +0.0039] | encoder change 0.00-0.01
+  L, graph 44                      n=3 s1 0.1992 s2 0.2163 WS 0.2159 | WS-s1 +0.0167 (p=0.03) | WS-s2 -0.0004 sd 0.0034 TOST p=0.02 90% CI [-0.0061, +0.0052] | encoder change 0.00-0.00
+  N, graph 42                      n=5 s1 0.3492 s2 0.3647 WS 0.3650 | WS-s1 +0.0158 (p=0.0011) | WS-s2 +0.0002 sd 0.0021 TOST p=0.00025 90% CI [-0.0018, +0.0023] | encoder change 0.14-0.20
+  N, graph 43                      n=3 s1 0.3337 s2 0.3457 WS 0.3474 | WS-s1 +0.0136 (p=0.011) | WS-s2 +0.0017 sd 0.0017 TOST p=0.0067 90% CI [-0.0012, +0.0045] | encoder change 0.13-0.16
+  N, graph 44                      n=3 s1 0.3448 s2 0.3541 WS 0.3540 | WS-s1 +0.0092 (p=0.039) | WS-s2 -0.0001 sd 0.0008 TOST p=0.0012 90% CI [-0.0015, +0.0013] | encoder change 0.12-0.17
+  L, graph 42, $\eta_g = 3 \times 10^{-4}$ n=5 s1 0.1867 s2 0.2051 WS 0.2066 | WS-s1 +0.0199 (p=0.00053) | WS-s2 +0.0016 sd 0.0023 TOST p=0.0006 90% CI [-0.0006, +0.0038] | encoder change 0.13-0.25
+  L, graph 42, batch 4096          n=3 s1 0.1350 s2 0.2010 WS 0.2022 | WS-s1 +0.0671 (p=0.002) | WS-s2 +0.0012 sd 0.0042 TOST p=0.035 90% CI [-0.0060, +0.0083] | encoder change 0.69-0.72
+  pooled L: n=11 mean -0.0001 95% CI [-0.0016, +0.0014] TOST p=2e-08; graph means [-0.0004, 0.0008, -0.0004] graph-level TOST p=0.00087
+  pooled N: n=11 mean +0.0005 95% CI [-0.0006, +0.0017] TOST p=3.1e-09; graph means [0.0002, 0.0017, -0.0001] graph-level TOST p=0.0017
+
+== 8. Graph instances
+  graph 42: seeds 5; tuned L RotatE 0.205 WS-RGCN 0.205 ComplEx 0.134 DistMult 0.116 TransE 0.068 CompGCN 0.052 R-GCN 0.049
+           tuned N RotatE 0.365 WS-RGCN 0.365 ComplEx 0.255 DistMult 0.264 TransE 0.169 CompGCN 0.234 R-GCN 0.250
+           N/L RotatE 1.8 WS-RGCN 1.8 ComplEx 1.9 DistMult 2.3 TransE 2.5 CompGCN 4.5 R-GCN 5.1
+           shared L TransE 0.0177 RotatE 0.0105 DistMult 0.0445 ComplEx 0.0406 R-GCN 0.0489 CompGCN 0.0449; Spearman shared vs tuned -0.83
+           order L: RotatE, WS-RGCN, ComplEx, DistMult, TransE, CompGCN, R-GCN | order N: WS-RGCN, RotatE, DistMult, ComplEx, R-GCN, CompGCN, TransE
+           rule miner L 0.2274 N 0.3891
+  graph 43: seeds 3; tuned L RotatE 0.221 WS-RGCN 0.222 ComplEx 0.145 DistMult 0.123 TransE 0.075 CompGCN 0.041 R-GCN 0.053
+           tuned N RotatE 0.346 WS-RGCN 0.347 ComplEx 0.257 DistMult 0.269 TransE 0.159 CompGCN 0.240 R-GCN 0.248
+           N/L RotatE 1.6 WS-RGCN 1.6 ComplEx 1.8 DistMult 2.2 TransE 2.1 CompGCN 5.8 R-GCN 4.6
+           shared L TransE 0.0287 RotatE 0.0110 DistMult 0.0505 ComplEx 0.0444 R-GCN 0.0559 CompGCN 0.0433; Spearman shared vs tuned -0.37
+           order L: WS-RGCN, RotatE, ComplEx, DistMult, TransE, R-GCN, CompGCN | order N: WS-RGCN, RotatE, DistMult, ComplEx, R-GCN, CompGCN, TransE
+           rule miner L 0.2132 N 0.3572
+  graph 44: seeds 3; tuned L RotatE 0.216 WS-RGCN 0.216 ComplEx 0.148 DistMult 0.118 TransE 0.068 CompGCN 0.055 R-GCN 0.054
+           tuned N RotatE 0.354 WS-RGCN 0.354 ComplEx 0.271 DistMult 0.276 TransE 0.167 CompGCN 0.244 R-GCN 0.262
+           N/L RotatE 1.6 WS-RGCN 1.6 ComplEx 1.8 DistMult 2.3 TransE 2.5 CompGCN 4.4 R-GCN 4.9
+           shared L TransE 0.0255 RotatE 0.0085 DistMult 0.0476 ComplEx 0.0441 R-GCN 0.0568 CompGCN 0.0484; Spearman shared vs tuned -0.83
+           order L: RotatE, WS-RGCN, ComplEx, DistMult, TransE, CompGCN, R-GCN | order N: RotatE, WS-RGCN, DistMult, ComplEx, R-GCN, CompGCN, TransE
+           rule miner L 0.2291 N 0.3709
+
+== 9. Rule miner against the best trained model (paired over test triples, model RR averaged over seeds)
+  C2KG-L 42       rule 0.2274  best RotatE 0.2051  rule-best +0.0224 [+0.0077, +0.0372]
+  C2KG-L 43       rule 0.2132  best WS-RGCN 0.2221  rule-best -0.0089 [-0.0223, +0.0040]
+  C2KG-L 44       rule 0.2291  best RotatE 0.2163  rule-best +0.0127 [-0.0017, +0.0273]
+  C2KG-N 42       rule 0.3891  best WS-RGCN 0.3650  rule-best +0.0241 [+0.0112, +0.0370]
+  C2KG-N 43       rule 0.3572  best WS-RGCN 0.3474  rule-best +0.0098 [-0.0022, +0.0218]
+  C2KG-N 44       rule 0.3709  best RotatE 0.3541  rule-best +0.0168 [+0.0040, +0.0297]
+  C2KG-N-blocked  rule 0.2419  best RotatE 0.2156  rule-best +0.0264 [+0.0127, +0.0406]
+
+== 10. WN18RR
+  test 3134; mirror in training 1086 (34.7%); kept after blocking 37; unseen entity 210; symmetric relations 1172
+  RotatE   Original                   h+t 0.4597 $\pm$ 0.0017 H@1 0.427 H@10 0.523 | tail 0.4823 $\pm$ 0.0014 sym 0.937 other 0.211 | seeds 3
+  RotatE   Original, mirrors removed  h+t 0.1813 $\pm$ 0.0013 H@1 0.127 H@10 0.290 | tail 0.2062 $\pm$ 0.0020 sym 0.201 other 0.209 | seeds 3
+  RotatE   Leakage-aware              h+t 0.1938 $\pm$ 0.0003 H@1 0.135 H@10 0.309 | tail 0.2165 $\pm$ 0.0018 sym 0.200 other 0.226 | seeds 3
+           same triples: blocked 1049 1.000 -> 0.179; not leaked 2048 0.208 -> 0.206; O without unseen-entity triples: tail 0.5167, head+tail 0.4926
+  ComplEx  Original                   h+t 0.4057 $\pm$ 0.0019 H@1 0.382 H@10 0.449 | tail 0.4155 $\pm$ 0.0040 sym 0.929 other 0.109 | seeds 3
+  ComplEx  Original, mirrors removed  h+t 0.1078 $\pm$ 0.0033 H@1 0.072 H@10 0.175 | tail 0.1197 $\pm$ 0.0050 sym 0.132 other 0.113 | seeds 3
+  ComplEx  Leakage-aware              h+t 0.1147 $\pm$ 0.0006 H@1 0.075 H@10 0.187 | tail 0.1233 $\pm$ 0.0009 sym 0.129 other 0.120 | seeds 3
+           same triples: blocked 1049 0.995 -> 0.105; not leaked 2048 0.108 -> 0.111; O without unseen-entity triples: tail 0.4443, head+tail 0.4342
+  DistMult Original                   h+t 0.3782 $\pm$ 0.0017 H@1 0.362 H@10 0.410 | tail 0.3876 $\pm$ 0.0013 sym 0.932 other 0.062 | seeds 3
+  DistMult Original, mirrors removed  h+t 0.0617 $\pm$ 0.0013 H@1 0.038 H@10 0.109 | tail 0.0718 $\pm$ 0.0020 sym 0.084 other 0.064 | seeds 3
+  DistMult Leakage-aware              h+t 0.0698 $\pm$ 0.0031 H@1 0.044 H@10 0.118 | tail 0.0810 $\pm$ 0.0036 sym 0.095 other 0.073 | seeds 3
+           same triples: blocked 1049 1.000 -> 0.054; not leaked 2048 0.063 -> 0.064; O without unseen-entity triples: tail 0.4147, head+tail 0.4050
+  rule miner Original: tail 0.3977 (noisy-or); frequency 0.0346
+  rule miner mirrors removed: tail 0.1010 (noisy-or); frequency 0.0346
+  rule miner leakage-aware: tail 0.0788 (noisy-or-paths); frequency 0.0347
+  per relation: n(O) n(L) | RotatE tail MRR O / Ob / L
+    _hypernym                       1251  1188 | 0.202 / 0.201 / 0.236
+    _derivationally_related_form    1074  1052 | 0.952 / 0.214 / 0.209
+    _member_meronym                  253   310 | 0.079 / 0.072 / 0.077
+    _has_part                        172   200 | 0.159 / 0.160 / 0.179
+    _instance_hypernym               122   116 | 0.517 / 0.526 / 0.479
+    _synset_domain_topic_of          114   121 | 0.434 / 0.417 / 0.426
+    _also_see                         56    47 | 0.610 / 0.068 / 0.087
+    _verb_group                       39    42 | 0.975 / 0.031 / 0.129
+    _member_of_domain_region          26    30 | 0.050 / 0.055 / 0.036
+    _member_of_domain_usage           24    22 | 0.008 / 0.010 / 0.036
+    _similar_to                        3     6 | 1.000 / 0.000 / 0.000

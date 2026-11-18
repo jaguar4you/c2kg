@@ -222,7 +222,9 @@ python unpack_results.py
 python c2kg_runner.py report --out ../runs/c2kg_L.json
 ```
 
-These files were produced with release v1.1.0 (`code_sha` 9180722b6c77 for
+`python make_tables.py` recomputes every number and table of the paper from
+these files (written to `results/paper/`; `numbers.txt` lists the numbers
+quoted in the text). These files were produced with release v1.1.0 (`code_sha` 9180722b6c77 for
 C2KG, 731a29f5e086 for WN18RR). Release v1.1.1 changes the code fingerprint
 (c3e0de0de8a0 and 082930b7ac7b) only through the corrected domain table in
 `ontology.py`, which affects the head-side type-constrained metrics and
@@ -250,6 +252,18 @@ continue a v1.1.0 results file with v1.1.1 code, but a rerun reproduces it.
 | `test_metrics.py` | checks the metrics against a Monte Carlo simulation of random tie-breaking |
 | `check_data.py` | checks the data fingerprints |
 | `unpack_results.py` | unpacks `results/runs/*.json.gz` into `runs/` |
+| `make_tables.py` | computes every number and table of the paper from the result files |
+| `plot_lr_curves.py` | figure of the learning-rate search (requires matplotlib) |
+| `competency_questions.py` | answers five C2 competency questions over a graph |
+
+## Changes in v1.1.2
+
+No data, no trained-model result and no training or evaluation code changed.
+
+* New: `make_tables.py`, which computes every number and table of the
+  paper from `results/runs/`, the probe outputs and the data, and writes
+  them to `results/paper/`; `plot_lr_curves.py`; `competency_questions.py`
+  and its output `results/competency_questions.txt`.
 
 ## Changes in v1.1.1
 

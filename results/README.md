@@ -34,4 +34,6 @@ CUDA 12.8). `python unpack_results.py` unpacks them into `runs/`.
 | `audit_threshold_sensitivity.txt` | `python audit_sensitivity.py` |
 | `probe_L.json`, `probe_L.txt` (and the other C2KG folders) | `python path_probe.py --data ../data/c2kg_L --probe all --rule locatedAt,adjacentTo,nearLocation --out ../results/probe_L.json` |
 | `probe_wn_O.json`, `probe_wn_O.txt` (and `_O_blocked`, `_L`) | `python path_probe.py --data ../data/wn18rr_O --probe all --out ../results/probe_wn_O.json` |
-| `verification_v1.1.txt`, `verification_v1.1.1.txt` | checks of the code before the runs and of release v1.1.1 |
+| `competency_questions.txt` | `python competency_questions.py --data ../data/c2kg_L` (and graphs 43, 44) |
+| `paper/` | `python make_tables.py`: `numbers.txt` (every number quoted in the paper), the tables (`tab_*.tex`) and `lr_curves.json`; `python plot_lr_curves.py` draws `fig_lr_curves` |
+| `verification_v1.1.txt`, `verification_v1.1.1.txt`, `verification_v1.1.2.txt` | checks of the code before the runs and of releases v1.1.1 and v1.1.2 |

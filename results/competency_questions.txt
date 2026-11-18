@@ -1,0 +1,18 @@
+graph of c2kg_L: 12573 triples
+  CQ1:   161 answers; 33 of 36 times have an answer
+  CQ2:     1 answers; 1 of 38 threatened friendly units have an answer
+  CQ3:     9 answers; 9 of 172 supported units have an answer
+  CQ4:   560 answers; 511 of 4032 (time, terrain, weather) combinations have an answer
+  CQ5:  1120 answers; 560 of 560 engagements have an answer
+graph of c2kg_L_g43: 12535 triples
+  CQ1:   209 answers; 32 of 36 times have an answer
+  CQ2:     2 answers; 2 of 40 threatened friendly units have an answer
+  CQ3:     7 answers; 7 of 167 supported units have an answer
+  CQ4:   560 answers; 507 of 4032 (time, terrain, weather) combinations have an answer
+  CQ5:  1120 answers; 560 of 560 engagements have an answer
+graph of c2kg_L_g44: 12555 triples
+  CQ1:   161 answers; 34 of 36 times have an answer
+  CQ2:     1 answers; 1 of 41 threatened friendly units have an answer
+  CQ3:     8 answers; 8 of 163 supported units have an answer
+  CQ4:   560 answers; 508 of 4032 (time, terrain, weather) combinations have an answer
+  CQ5:  1120 answers; 560 of 560 engagements have an answer
